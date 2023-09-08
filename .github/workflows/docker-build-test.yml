@@ -6,10 +6,10 @@ on:
     paths-ignore:
       - '.github/**'
       - '.gitignore'
-      - 'cypress/**'
       - 'database/**'
       - 'documentation/**'
       - 'openshift/**'
+      - 'CODE_OF_CONDUCT.md'
       - 'COMPLIANCE.yaml'
       - 'CONTRIBUTING.md'
       - 'LICENSE'

@@ -17,5 +17,5 @@ WORKDIR /app
 COPY --from=build /app .
 
 # This port needs to match the port being used
-HEALTHCHECK CMD wget -qO- -t1 http://localhost:80/healthz || exit 1
+HEALTHCHECK CMD wget -qO- -t1 http://localhost:8080/healthz || exit 1
 ENTRYPOINT ["dotnet", "WebApp.dll"]

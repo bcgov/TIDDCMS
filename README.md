@@ -1,18 +1,19 @@
 # TIDDCMS
 CMS platform for Trade and Industry Development Division
 
-
 [![Lifecycle:Experimental](https://img.shields.io/badge/Lifecycle-Experimental-339999)](https://github.com/bcgov/repomountie/blob/master/doc/lifecycle-badges.md)
 The project is in the very early stages of development.
 
 ## Directory Structure
 
-    .github/workflows          - GitHub Actions
+    .github                    - GitHub Actions
     applications/              - Application Root
     database/                  - Database configuration files
     documentation/             - Solution documentation and assets
     openshift/                 - OpenShift-deployment files
+    CODE_OF_CONDUCT.md         - Contributor Covenant
     COMPLIANCE.yaml            - BCGov PIA/STRA compliance status
+    CONTRIBUTING.md            - How to contribute
     LICENSE                    - License
     SECURITY.md                - Security Policy and Reporting
 
