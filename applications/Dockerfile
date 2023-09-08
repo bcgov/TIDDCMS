@@ -1,5 +1,5 @@
 # Building .NET container image:
-# https://github.com/dotnet/dotnet-docker/blob/main/samples/README.md
+# 
 FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
 WORKDIR /source
 
