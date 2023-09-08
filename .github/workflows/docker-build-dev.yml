@@ -40,7 +40,7 @@ jobs:
         oc registry login
     - name: Push application images to OpenShift container registry
       run:  | 
-        docker tag project-image image-registry.apps.silver.devops.gov.bc.ca/$TARGET_PROJECT-$TARGET_ENV/project-image:github-latest
-        docker push image-registry.apps.silver.devops.gov.bc.ca/$TARGET_PROJECT-$TARGET_ENV/project-image:github-latest
+        docker tag webapp image-registry.apps.silver.devops.gov.bc.ca/$TARGET_PROJECT-$TARGET_ENV/webapp:github-latest
+        docker push image-registry.apps.silver.devops.gov.bc.ca/$TARGET_PROJECT-$TARGET_ENV/webapp:github-latest
       
       
