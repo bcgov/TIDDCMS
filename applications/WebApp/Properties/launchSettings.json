@@ -37,7 +37,7 @@
         "ASPNETAPP_FULLNAME": "Application System Name",
         "ASPNETAPP_NAME": "WebApp",
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "ASPNETCORE_URLS": "https://localhost:7131;http://localhost:5011"
+        "ASPNETCORE_URLS": "https://localhost:7131"
       },
       "distributionName": ""
     }
