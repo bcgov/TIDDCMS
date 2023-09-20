@@ -1,18 +1,18 @@
 {
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
         {
-            // Use IntelliSense to find out which attributes exist for C# debugging
-            // Use hover for the description of the existing attributes
-            // For further information visit https://github.com/dotnet/vscode-csharp/blob/main/debugger-launchjson.md.
             "name": ".NET Core Launch (web)",
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
             // If you have changed target frameworks, make sure to update the program path.
-            "program": "${workspaceFolder}/applications/WebApp/bin/Debug/net7.0/WebApp.dll",
+            "program": "${workspaceFolder}/applications/Unity.GrantManager/src/Unity.GrantManager.Web/bin/Debug/net7.0/Unity.GrantManager.Web.dll",
             "args": [],
-            "cwd": "${workspaceFolder}/applications/WebApp",
+            "cwd": "${workspaceFolder}/applications/Unity.GrantManager/src/Unity.GrantManager.Web",
             "stopAtEntry": false,
             // Enable launching a web browser when ASP.NET Core starts. For more information: https://aka.ms/VSCode-CS-LaunchJson-WebBrowser
             "serverReadyAction": {
@@ -20,7 +20,8 @@
                 "pattern": "\\bNow listening on:\\s+(https?://\\S+)"
             },
             "env": {
-                "ASPNETCORE_ENVIRONMENT": "Development"
+                "ASPNETCORE_ENVIRONMENT": "Development",
+                "ASPNETCORE_URLS": "http://localhost:5022"
             },
             "sourceFileMap": {
                 "/Views": "${workspaceFolder}/Views"
@@ -31,5 +32,6 @@
             "type": "coreclr",
             "request": "attach"
         }
+
     ]
 }

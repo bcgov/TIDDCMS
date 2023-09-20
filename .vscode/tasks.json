@@ -7,7 +7,7 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/applications/WebApp.sln",
+                "${workspaceFolder}/applications/Unity.GrantManager/Unity.GrantManager.sln",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -19,7 +19,7 @@
             "type": "process",
             "args": [
                 "publish",
-                "${workspaceFolder}/applications/WebApp.sln",
+                "${workspaceFolder}/applications/Unity.GrantManager/Unity.GrantManager.sln",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -33,7 +33,7 @@
                 "watch",
                 "run",
                 "--project",
-                "${workspaceFolder}/applications/WebApp.sln"
+                "${workspaceFolder}/applications/Unity.GrantManager/Unity.GrantManager.sln"
             ],
             "problemMatcher": "$msCompile"
         }
