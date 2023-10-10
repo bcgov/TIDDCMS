@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Volo.Abp.Application.Services;
 
 namespace Unity.GrantManager.Attachments
@@ -10,5 +7,6 @@ namespace Unity.GrantManager.Attachments
     {
         Task SaveBlobAsync(SaveBlobInputDto saveBlobInputDto);
         Task <BlobDto> GetBlobAsync(GetBlobRequestDto getBlobRequestDto);
+        Task<bool> DeleteBlobAsync(DeleteBlobRequestDto deleteBlobRequestDto);
     }
 }
