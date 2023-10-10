@@ -1,14 +1,12 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using RestSharp;
-using RestSharp.Authenticators;
 using RestSharp.Serializers.Json;
-using System;
-using System.Net.Http;
-using System.Net.Mime;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Unity.GrantManager.Assessments;
 using Unity.GrantManager.Attachments;
 using Unity.GrantManager.Intake;
 using Volo.Abp.Account;
@@ -40,57 +38,74 @@ public class GrantManagerApplicationModule : AbpModule
         var configuration = context.Services.GetConfiguration();
         Configure<AbpBlobStoringOptions>(options =>
         {
-            options.Containers.Configure<ComsS3Container>(container =>
+            options.Containers.Configure<S3Container>(container =>
             {
-                container.UseComsS3CustomBlobProvider(provider =>
+                container.UseS3CustomBlobProvider(provider =>
                 {
-                    provider.BucketId = configuration["S3:BucketId"] ?? "";
-                    provider.BaseUri = configuration["S3:BaseUri"] ?? "";
-                    provider.Username = configuration["S3:Username"] ?? "";
-                    provider.Password = configuration["S3:Password"] ?? "";
+                    provider.AccessKeyId = configuration["S3:AccessKeyId"] ?? "";
+                    provider.Bucket = configuration["S3:Bucket"] ?? "";
+                    provider.Endpoint = configuration["S3:Endpoint"] ?? "";
+                    provider.SecretAccessKey = configuration["S3:SecretAccessKey"] ?? "";
+                    provider.ApplicationS3Folder = configuration["S3:ApplicationS3Folder"] ?? "";
+                    provider.AssessmentS3Folder = configuration["S3:AssessmentS3Folder"] ?? "";
                 });
             });
         });
         Configure<AbpAutoMapperOptions>(options =>
         {
             options.AddMaps<GrantManagerApplicationModule>();
-        });      
+        });
 
-        Configure<IntakeClientOptions>(options => {
+        context.Services.AddSingleton<IAuthorizationHandler, AssessmentAuthorizationHandler>();
+
+        Configure<IntakeClientOptions>(options =>
+        {
             options.BaseUri = configuration["Intake:BaseUri"] ?? "";
-            options.FormId  = configuration["Intake:FormId"] ?? "";
-            options.ApiKey  = configuration["Intake:ApiKey"] ?? "";
             options.BearerTokenPlaceholder = configuration["Intake:BearerTokenPlaceholder"] ?? "";
             options.UseBearerToken = configuration.GetValue<bool>("Intake:UseBearerToken");
         });
 
         context.Services.AddSingleton<RestClient>(provider =>
         {
-            var options = provider.GetService<IOptions<IntakeClientOptions>>().Value;
-
-            var restOptions = new RestClientOptions(options.BaseUri)
+            var options = provider.GetService<IOptions<IntakeClientOptions>>()?.Value;
+            if (null != options)
             {
-                // NOTE: Basic authentication only works for fetching forms and lists of form submissions
-                Authenticator = options.UseBearerToken ?
-                    new JwtAuthenticator(options.BearerTokenPlaceholder) :
-                    new HttpBasicAuthenticator(options.FormId, options.ApiKey),
+                var restOptions = new RestClientOptions(options.BaseUri)
+                {
+                    // NOTE: Basic authentication only works for fetching forms and lists of form submissions
+                    // Authenticator = options.UseBearerToken ?
+                    //    new JwtAuthenticator(options.BearerTokenPlaceholder) :
+                    //    new HttpBasicAuthenticator(options.FormId, options.ApiKey),
 
-                FailOnDeserializationError = true,
-                ThrowOnDeserializationError = true
-            };
+                    FailOnDeserializationError = true,
+                    ThrowOnDeserializationError = true
+                };
 
-            var client = new RestClient(
-                restOptions,
-                configureSerialization: s => 
-                    s.UseSystemTextJson(new System.Text.Json.JsonSerializerOptions {
-                        WriteIndented = true,
-                        PropertyNameCaseInsensitive = true,
-                        ReadCommentHandling = JsonCommentHandling.Skip,
-                        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
-                    })
-                );
-
-            return client;
+                return new RestClient(
+                    restOptions,
+                    configureSerialization: s =>
+                        s.UseSystemTextJson(new System.Text.Json.JsonSerializerOptions
+                        {
+                            WriteIndented = true,
+                            PropertyNameCaseInsensitive = true,
+                            ReadCommentHandling = JsonCommentHandling.Skip,
+                            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+                        })
+                    );
+            }
+            else
+            {
+                return new RestClient(
+                    configureSerialization: s =>
+                        s.UseSystemTextJson(new System.Text.Json.JsonSerializerOptions
+                        {
+                            WriteIndented = true,
+                            PropertyNameCaseInsensitive = true,
+                            ReadCommentHandling = JsonCommentHandling.Skip,
+                            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+                        })
+                    );
+            }
         });
     }
 }
