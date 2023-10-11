@@ -36,7 +36,7 @@ parameters:
     displayName: "API endpoint for S3 compatible storage account"
     description: "Object store URL. eg: https://econ.objectstore.gov.bc.ca"
     required: true
-    value: "econ.objectstore.gov.bc.ca"
+    value: "https://econ.objectstore.gov.bc.ca"
   - name: SecretKey
     displayName: "Secret Key"
     description: "S3 account Secret Access Key, similar to a password."
@@ -64,6 +64,6 @@ objects:
   data:
     # Configuration values can be set as key-value properties
     ApplicationFolder: Unity/Application
-    AssessmentFolder: Unity/Assessment
+    AssessmentFolder: Unity/Adjudication
     DisallowedFileTypes: '[]'
     MaxFileSize: '25'
