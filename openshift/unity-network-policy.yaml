@@ -7,6 +7,7 @@ metadata:
   # This template yaml file uses a separate parameter .env file to 
   # override the default values defined in this section. A template 
   # usage guide can be found in the readme.md and wiki documents.
+  # oc process -f .\openshift\unity-network-policy.yaml --param-file=.env | oc create -f -
 parameters:
   # Common project parameters
   - name: PROJECT_NAMESPACE
