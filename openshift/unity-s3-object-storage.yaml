@@ -7,6 +7,7 @@ metadata:
   # This template yaml file uses a separate parameter .env file to 
   # override the default values defined in this section. A template 
   # usage guide can be found in the readme.md and wiki documents.
+  # oc process -f .\openshift\unity-s3-object-storage.yaml --param-file=.env | oc create -f -
 parameters:
   # Common project parameters
   - name: PROJECT_NAMESPACE
@@ -24,46 +25,45 @@ parameters:
   - name: AccessKeyID
     displayName: "Access Key Login ID"
     description: "The Access Key for S3 compatible object storage account"
-    required: true
-    value: "unity-dev-admin"
-  - name: BucketDisplayName
+    from: '[A-Z0-9]{20}_default'
+    generate: expression
+  - name: BucketName
     displayName: "Bucket Name"
     description: "The object storage bucket name"
     required: true
-    value: "unity-dev"
-  - name: RestEndpoint
+    value: "econ-unity-dev"
+  - name: Endpoint
     displayName: "API endpoint for S3 compatible storage account"
     description: "Object store URL. eg: https://econ.objectstore.gov.bc.ca"
     required: true
-    value: "sbg.objectstore.gov.bc.ca"
+    value: "econ.objectstore.gov.bc.ca"
   - name: SecretKey
     displayName: "Secret Key"
     description: "S3 account Secret Access Key, similar to a password."
     from: '[\w]{32}_default'
     generate: expression
-  - name: comskey
-    displayName: "COMS Prefix Key"
-    description: "The prefix given to objects in the COMS managed bucket"
-    required: true
-    value: "coms"
-  - name: comsbucketId
-    displayName: "COMS object identifier"
-    description: "The COMS uuid representing the COMS managed bucket"
-    required: true
-    from: "[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}-default"
-    generate: expression
 # Template to add secret for the project S3 storage bucket.
 objects:
-  - kind: Secret
-    apiVersion: v1
-    metadata:
-      name: s3-object-storage
-      namespace: ${PROJECT_NAMESPACE}-${ENV_NAME}
-    stringData:
-      Access-Key-ID: ${AccessKeyID}
-      Bucket-Display-Name: ${BucketDisplayName}
-      Rest-Endpoint: ${RestEndpoint}
-      Secret-Key: ${SecretKey}
-      coms-key: ${comskey}/${ENV_NAME}
-      coms-bucketId: ${comsbucketId}
-    type: Opaque
+# Secrets
+- apiVersion: v1
+  kind: Secret
+  metadata:
+    name: s3-object-storage
+    namespace: ${PROJECT_NAMESPACE}-${ENV_NAME}
+  stringData:
+    Access-Key-ID: ${AccessKeyID}
+    Bucket-Display-Name: ${BucketName}
+    Rest-Endpoint: ${Endpoint}
+    Secret-Key: ${SecretKey}
+  type: Opaque
+# Configmap
+- apiVersion: v1 
+  kind: ConfigMap 
+  metadata:
+    name: s3-object-storage
+  data:
+    # Configuration values can be set as key-value properties
+    ApplicationFolder: Unity/Application
+    AssessmentFolder: Unity/Assessment
+    DisallowedFileTypes: '[]'
+    MaxFileSize: '25'

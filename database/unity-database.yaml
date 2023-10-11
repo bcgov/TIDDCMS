@@ -8,7 +8,7 @@ message: |-
          Username: ${POSTGRESQL_USER}
          Password: ${POSTGRESQL_PASSWORD}
     Database Name: ${POSTGRESQL_DATABASE}
-   Connection URL: unity-database://${DATABASE_SERVICE_NAME}:5432/
+   Connection URL: unity-database://${DATABASE_SERVICE_NAME}:${DATABASE_PORT}/
 
   For more information about using this template, including OpenShift considerations, see template 
   usage guide found in the project readme.md and wiki documents.
@@ -17,6 +17,7 @@ metadata:
   # namespace: ${PROJECT_NAMESPACE}-${ENV_NAME}
   # This template yaml file uses a separate parameter .env file to 
   # override the default values defined in this section. 
+  # oc process -f .\database\unity-database.yaml --param-file=.env | oc create -f -
   annotations:
     description: |-
       PostgreSQL database service, with persistent storage.
@@ -47,6 +48,11 @@ parameters:
   name: DATABASE_SERVICE_NAME
   required: true
   value: unity-database
+- description: The port exposed for the database.
+  displayName: Database Service Port
+  name: DATABASE_PORT
+  required: true
+  value: "5432"
 - description: Username for PostgreSQL user that will be used for accessing the database.
   displayName: PostgreSQL Connection Username
   name: POSTGRESQL_USER
@@ -92,11 +98,20 @@ objects:
       template.openshift.io/expose-database_name: '{.data[''database-name'']}'
       template.openshift.io/expose-password: '{.data[''database-password'']}'
       template.openshift.io/expose-username: '{.data[''database-user'']}'
-    name: ${DATABASE_SERVICE_NAME}-secret
+    name: ${DATABASE_SERVICE_NAME}
   stringData:
     database-name: ${POSTGRESQL_DATABASE}
     database-password: ${POSTGRESQL_PASSWORD}
     database-user: ${POSTGRESQL_USER}
+  type: Opaque
+# Configmap
+- apiVersion: v1 
+  kind: ConfigMap 
+  metadata:
+    name: ${DATABASE_SERVICE_NAME}
+  data:
+    # Configuration values can be set as key-value properties
+    UNITY_DB_PORT: ${DATABASE_PORT}
 # Service
 - apiVersion: v1
   kind: Service
@@ -171,17 +186,17 @@ objects:
             valueFrom:
               secretKeyRef:
                 key: database-user
-                name: ${DATABASE_SERVICE_NAME}-secret
+                name: ${DATABASE_SERVICE_NAME}
           - name: POSTGRESQL_PASSWORD
             valueFrom:
               secretKeyRef:
                 key: database-password
-                name: ${DATABASE_SERVICE_NAME}-secret
+                name: ${DATABASE_SERVICE_NAME}
           - name: POSTGRESQL_DATABASE
             valueFrom:
               secretKeyRef:
                 key: database-name
-                name: ${DATABASE_SERVICE_NAME}-secret
+                name: ${DATABASE_SERVICE_NAME}
           image: ' '
           imagePullPolicy: IfNotPresent
           livenessProbe:
