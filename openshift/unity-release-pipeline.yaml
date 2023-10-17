@@ -1,0 +1,49 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: unity-release
+spec:
+  params:
+    - description: The semantic version identifier
+      name: imagetag
+      type: string
+    - description: The version tag name identifier
+      name: tagname
+      type: string
+  tasks:
+    - name: describe-template
+      params:
+        - name: SCRIPT
+          value: oc describe template unity-grantmanager-dbmigrator-job
+        - name: VERSION
+          value: latest
+      taskRef:
+        kind: ClusterTask
+        name: openshift-client
+    - name: clean-dbmigrator-jobs
+      params:
+        - name: SCRIPT
+          value: 'oc delete jobs unity-grantmanager-dbmigrator '
+        - name: VERSION
+          value: latest
+      runAfter:
+        - describe-template
+      taskRef:
+        kind: ClusterTask
+        name: openshift-client
+    - name: run-dbmigrator-job
+      params:
+        - name: SCRIPT
+          value: >-
+            oc process unity-grantmanager-dbmigrator-job -p ENV_NAME=dev  -p
+            PROJECT_NAMESPACE=c57ee7 | oc create -f -
+        - name: VERSION
+          value: latest
+      runAfter:
+        - clean-dbmigrator-jobs
+      taskRef:
+        kind: ClusterTask
+        name: openshift-client
+  resources: []
+  workspaces: []
+  finally: []

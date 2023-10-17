@@ -1,13 +1,13 @@
 apiVersion: template.openshift.io/v1
 kind: Template
 labels:
-  template: ${APPLICATION_NAME}
+  template: unity-grantmanager-dbmigrator
 message: |-
-  A build config has been created in your project: ${APPLICATION_NAME}.
+  A build config has been created in your project: unity-grantmanager-dbmigrator.
   For more information about using this template, including OpenShift considerations, 
   see template usage guide found in the project readme.md and wiki documents.
 metadata:
-  name: ${APPLICATION_NAME}
+  name: unity-grantmanager-dbmigrator
   # namespace: ${PROJECT_NAMESPACE}-${ENV_NAME}
   # This template uses a separate parameter .env file to override the default values defined in this section. 
   # oc process -f .\openshift\unity-grantmanager-dbmigrator.yaml --param-file=.env | oc create -f -
@@ -18,7 +18,7 @@ metadata:
     openshift.io/display-name: DotNet console application
     template.openshift.io/long-description: |-
       This template defines resources needed to build and deploy a GitHub DotNet core console application.
-    tags: dotnet,build
+    tags: dotnet,unity-grantmanager-dbmigrator
 parameters:
 # Project namespace parameters
 - description: "The OpenShift project license plate 6 charater alpha numberic."
@@ -62,13 +62,13 @@ parameters:
   value: /applications/Unity.GrantManager
 - description: GitHub build trigger secret (Incomming Webhook)
   displayName: Github Webhook Secret
-  from: '[a-zA-Z0-9]{16}'
+  from: '[a-zA-Z0-9]{26}'
   generate: expression
   name: GITHUB_WEBHOOK_SECRET
   required: true
 - description: Generic build trigger secret (Incomming Webhook)
   displayName: Generic Webhook Secret
-  from: '[a-zA-Z0-9]{16}'
+  from: '[a-zA-Z0-9]{26}'
   generate: expression
   name: GENERIC_WEBHOOK_SECRET
   required: true
