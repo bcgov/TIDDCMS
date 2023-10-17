@@ -15,8 +15,7 @@ message: |-
 metadata:
   name: unity-database
   # namespace: ${PROJECT_NAMESPACE}-${ENV_NAME}
-  # This template yaml file uses a separate parameter .env file to 
-  # override the default values defined in this section. 
+  # This template uses a separate parameter .env file to override the default values defined in this section. 
   # oc process -f .\database\unity-database.yaml --param-file=.env | oc create -f -
   annotations:
     description: |-
@@ -28,7 +27,7 @@ metadata:
     openshift.io/long-description: This template provides a standalone PostgreSQL
       server with an initial database created.  The database is stored on persistent storage.
       The database name, username, and password are chosen via parameters when provisioning.
-    tags: database,postgresql
+    tags: unity-database,postgresql
 parameters:
 # Project namespace parameters
 - description: "The OpenShift project license plate 6 charater alpha numberic."
@@ -43,6 +42,10 @@ parameters:
   required: true
   value: "dev"
 # Additional parameters for project database provisioning
+- description: The name of the application grouping.
+  displayName: Application Group
+  name: APPLICATION_GROUP
+  value: unity-grantmanager
 - description: The name of the OpenShift Service exposed for the database.
   displayName: Database Service Name
   name: DATABASE_SERVICE_NAME
@@ -62,7 +65,7 @@ parameters:
   displayName: PostgreSQL Connection Password
   name: POSTGRESQL_PASSWORD
   required: true
-  from: '[a-zA-Z0-9]{16}'
+  from: '[a-zA-Z0-9]{26}'
   generate: expression
 - description: Name of the PostgreSQL database accessed.
   displayName: PostgreSQL Database Name
@@ -99,6 +102,12 @@ objects:
       template.openshift.io/expose-password: '{.data[''database-password'']}'
       template.openshift.io/expose-username: '{.data[''database-user'']}'
     name: ${DATABASE_SERVICE_NAME}
+    labels:
+      app: ${DATABASE_SERVICE_NAME}
+      app.kubernetes.io/component: ${DATABASE_SERVICE_NAME}
+      app.kubernetes.io/instance: ${DATABASE_SERVICE_NAME}-${ENV_NAME}
+      app.kubernetes.io/name: ${DATABASE_SERVICE_NAME}
+      app.kubernetes.io/part-of: ${APPLICATION_GROUP}    
   stringData:
     database-name: ${POSTGRESQL_DATABASE}
     database-password: ${POSTGRESQL_PASSWORD}
@@ -109,6 +118,12 @@ objects:
   kind: ConfigMap 
   metadata:
     name: ${DATABASE_SERVICE_NAME}
+    labels:
+      app: ${DATABASE_SERVICE_NAME}
+      app.kubernetes.io/component: ${DATABASE_SERVICE_NAME}
+      app.kubernetes.io/instance: ${DATABASE_SERVICE_NAME}-${ENV_NAME}
+      app.kubernetes.io/name: ${DATABASE_SERVICE_NAME}
+      app.kubernetes.io/part-of: ${APPLICATION_GROUP}
   data:
     # Configuration values can be set as key-value properties
     UNITY_DB_PORT: ${DATABASE_PORT}
@@ -119,6 +134,12 @@ objects:
     annotations:
       template.openshift.io/expose-uri: postgres://{.spec.clusterIP}:{.spec.ports[?(.name=="postgresql")].port}
     name: ${DATABASE_SERVICE_NAME}
+    labels:
+      app: ${DATABASE_SERVICE_NAME}
+      app.kubernetes.io/component: ${DATABASE_SERVICE_NAME}
+      app.kubernetes.io/instance: ${DATABASE_SERVICE_NAME}-${ENV_NAME}
+      app.kubernetes.io/name: ${DATABASE_SERVICE_NAME}
+      app.kubernetes.io/part-of: ${APPLICATION_GROUP}    
   spec:
     ports:
     - name: postgresql
@@ -137,6 +158,12 @@ objects:
   kind: PersistentVolumeClaim
   metadata:
     name: ${DATABASE_SERVICE_NAME}
+    labels:
+      app: ${DATABASE_SERVICE_NAME}
+      app.kubernetes.io/component: ${DATABASE_SERVICE_NAME}
+      app.kubernetes.io/instance: ${DATABASE_SERVICE_NAME}-${ENV_NAME}
+      app.kubernetes.io/name: ${DATABASE_SERVICE_NAME}
+      app.kubernetes.io/part-of: ${APPLICATION_GROUP}
   spec:
     accessModes:
     - ReadWriteOnce
@@ -150,6 +177,12 @@ objects:
   kind: PersistentVolumeClaim
   metadata:
     name: ${DATABASE_SERVICE_NAME}-backup
+    labels:
+      app: ${DATABASE_SERVICE_NAME}
+      app.kubernetes.io/component: ${DATABASE_SERVICE_NAME}
+      app.kubernetes.io/instance: ${DATABASE_SERVICE_NAME}-${ENV_NAME}
+      app.kubernetes.io/name: ${DATABASE_SERVICE_NAME}
+      app.kubernetes.io/part-of: ${APPLICATION_GROUP}
   spec:
     accessModes:
     - ReadWriteOnce
@@ -158,16 +191,20 @@ objects:
         storage: ${VOLUME_CAPACITY}
       storageClassName: netapp-file-standard
       volumeMode: Filesystem
-# Deployment configuration
+# Deployment Config
 - apiVersion: apps.openshift.io/v1
   kind: DeploymentConfig
   metadata:
     annotations:
       template.alpha.openshift.io/wait-for-ready: "true"
-    labels:
-      app.kubernetes.io/part-of: unity-grantmanager
-      app.openshift.io/runtime: postgresql
     name: ${DATABASE_SERVICE_NAME}
+    labels:
+      app: ${DATABASE_SERVICE_NAME}
+      app.openshift.io/runtime: postgresql
+      app.kubernetes.io/component: ${DATABASE_SERVICE_NAME}
+      app.kubernetes.io/instance: ${DATABASE_SERVICE_NAME}-${ENV_NAME}
+      app.kubernetes.io/name: ${DATABASE_SERVICE_NAME}
+      app.kubernetes.io/part-of: ${APPLICATION_GROUP}
   spec:
     replicas: 1
     selector:

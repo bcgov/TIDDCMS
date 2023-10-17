@@ -1,13 +1,13 @@
 apiVersion: template.openshift.io/v1
 kind: Template
 labels:
-  template: ${APPLICATION_NAME}
+  template: unity-grantmanager-dbmigrator-job
 message: |-
-  A job has been created in your project: ${APPLICATION_NAME}.
+  A job has been created in your project: unity-grantmanager-dbmigrator-job.
   For more information about using this template, including OpenShift considerations, 
   see template usage guide found in the project readme.md and wiki documents.
 metadata:
-  name: ${APPLICATION_NAME}
+  name: unity-grantmanager-dbmigrator-job
   # namespace: ${PROJECT_NAMESPACE}-${ENV_NAME}
   # This template uses a separate parameter .env file to override the default values defined in this section. 
   # oc process -f .\openshift\unity-grantmanager-dbmigrator-job.yaml --param-file=.env | oc create -f -
@@ -18,7 +18,7 @@ metadata:
     openshift.io/display-name: DotNet console application
     template.openshift.io/long-description: |-
       This template defines resources needed to build and deploy a GitHub DotNet core console application.
-    tags: dotnet,job
+    tags: dotnet,unity-grantmanager-dbmigrator-job
 parameters:
 # Project namespace parameters
 - description: "The OpenShift project license plate 6 charater alpha numberic."
@@ -41,7 +41,7 @@ parameters:
 - description: The name of the application grouping.
   displayName: Application Group
   name: APPLICATION_GROUP
-  value: unity-grantmanager
+  value: Triggers
 - description: The name of the OpenShift Service exposed for the database.
   displayName: Database Service Name
   name: DATABASE_SERVICE_NAME
@@ -61,6 +61,10 @@ objects:
     labels:
       job-name: ${APPLICATION_NAME}
       app.openshift.io/runtime: build
+      app.kubernetes.io/component: ${APPLICATION_NAME}
+      app.kubernetes.io/instance: ${APPLICATION_NAME}-${ENV_NAME}
+      app.kubernetes.io/name: ${APPLICATION_NAME}
+      app.kubernetes.io/part-of: ${APPLICATION_GROUP}
   spec:
     parallelism: 1
     completions: 1
@@ -69,6 +73,8 @@ objects:
     template:
       metadata:
         name: ${APPLICATION_NAME}
+        labels:
+          application: ${APPLICATION_NAME}
       spec:
         containers:
           - name: ${APPLICATION_NAME}
