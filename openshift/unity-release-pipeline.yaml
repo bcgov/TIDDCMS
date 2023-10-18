@@ -13,7 +13,7 @@ metadata:
   # oc process -f .\openshift\unity-release-pipeline.yaml --param-file=.env | oc create -f -
   annotations:
     description: |-
-      An application template for running a DotNet console application once in OpenShift.
+      Template for running an application build and deployment in OpenShift.
     iconClass: icon-build
     openshift.io/display-name: DotNet console application
     template.openshift.io/long-description: |-

@@ -13,7 +13,7 @@ metadata:
   # oc process -f .\openshift\unity-release-triggers.yaml --param-file=.env | oc create -f -
   annotations:
     description: |-
-      An application template for running a DotNet console application once in OpenShift.
+      Template for triggering an application build pipeline in OpenShift.
     iconClass: icon-build
     openshift.io/display-name: DotNet console application
     template.openshift.io/long-description: |-
@@ -32,6 +32,16 @@ parameters:
   name: ENV_NAME
   required: true
   value: "dev"
+# Additional parameters for project application provisioning.
+- description: The name of the application grouping.
+  displayName: Application Group
+  name: APPLICATION_GROUP
+  value: Triggers
+- description: The name of the application.
+  displayName: Application Name
+  name: APPLICATION_NAME
+  required: true
+  value: unity-release
 - description: Pipeline trigger token (Incomming Webhook)
   displayName: Webhook token
   from: '[a-zA-Z0-9]{26}'
@@ -39,6 +49,19 @@ parameters:
   name: PIPELINE_TOKEN
   required: true
 objects:
+# Secrets 
+- apiVersion: v1
+  kind: Secret
+  metadata:
+    name: ${APPLICATION_NAME}-webhook-token
+    labels:
+      app: ${APPLICATION_NAME}
+      app.kubernetes.io/component: ${APPLICATION_NAME}
+      app.kubernetes.io/instance: ${APPLICATION_NAME}-${ENV_NAME}
+      app.kubernetes.io/name: ${APPLICATION_NAME}
+      app.kubernetes.io/part-of: ${APPLICATION_GROUP}
+  stringData:
+    WebHookSecretKey: ${PIPELINE_TOKEN}
 # Trigger template
 - apiVersion: triggers.tekton.dev/v1alpha1
   kind: TriggerTemplate
@@ -100,7 +123,7 @@ objects:
   metadata:
     labels:
       app.kubernetes.io/managed-by: EventListener
-      app.kubernetes.io/part-of: Triggers
+      app.kubernetes.io/part-of: ${APPLICATION_GROUP}
       eventlistener: unity
     name: el-unity
   spec:
