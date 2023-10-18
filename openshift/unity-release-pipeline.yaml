@@ -1,49 +1,106 @@
-apiVersion: tekton.dev/v1beta1
-kind: Pipeline
+apiVersion: template.openshift.io/v1
+kind: Template
+labels:
+  template: unity-release-pipeline
+message: |-
+  A pipeline has been created in your project: unity-release.
+  For more information about using this template, including OpenShift considerations, 
+  see template usage guide found in the project readme.md and wiki documents.
 metadata:
-  name: unity-release
-spec:
-  params:
-    - description: The semantic version identifier
-      name: imagetag
-      type: string
-    - description: The version tag name identifier
-      name: tagname
-      type: string
-  tasks:
-    - name: describe-template
-      params:
-        - name: SCRIPT
-          value: oc describe template unity-grantmanager-dbmigrator-job
-        - name: VERSION
-          value: latest
-      taskRef:
-        kind: ClusterTask
-        name: openshift-client
-    - name: clean-dbmigrator-jobs
-      params:
-        - name: SCRIPT
-          value: 'oc delete jobs unity-grantmanager-dbmigrator '
-        - name: VERSION
-          value: latest
-      runAfter:
-        - describe-template
-      taskRef:
-        kind: ClusterTask
-        name: openshift-client
-    - name: run-dbmigrator-job
-      params:
-        - name: SCRIPT
-          value: >-
-            oc process unity-grantmanager-dbmigrator-job -p ENV_NAME=dev  -p
-            PROJECT_NAMESPACE=c57ee7 | oc create -f -
-        - name: VERSION
-          value: latest
-      runAfter:
-        - clean-dbmigrator-jobs
-      taskRef:
-        kind: ClusterTask
-        name: openshift-client
-  resources: []
-  workspaces: []
-  finally: []
+  name: unity-release-pipeline
+  # namespace: ${PROJECT_NAMESPACE}-${ENV_NAME}
+  # This template uses a separate parameter .env file to override the default values defined in this section. 
+  # oc process -f .\openshift\unity-release-pipeline.yaml --param-file=.env | oc create -f -
+  annotations:
+    description: |-
+      An application template for running a DotNet console application once in OpenShift.
+    iconClass: icon-build
+    openshift.io/display-name: DotNet console application
+    template.openshift.io/long-description: |-
+      This template defines resources needed to build and deploy a GitHub DotNet core console application.
+    tags: dotnet,unity-release
+parameters:
+# Project namespace parameters
+- description: "The OpenShift project license plate 6 charater alpha numberic."
+  displayName: "Project Namespace"
+  name: PROJECT_NAMESPACE
+  required: true
+  generate: expression
+  from: "[a-z0-9]{6}"
+- description: "The OpenShift environment name [dev, test, prod]."
+  displayName: "Environment name"
+  name: ENV_NAME
+  required: true
+  value: "dev"
+objects:
+# Pipeline for Database Migrator
+- apiVersion: tekton.dev/v1beta1
+  kind: Pipeline
+  metadata:
+    name: unity-release
+  spec:
+    params:
+      - description: The semantic version identifier
+        name: imagetag
+        type: string
+      - description: The version tag name identifier
+        name: tagname
+        type: string
+    tasks:
+      - name: describe-templates
+        params:
+          - name: SCRIPT
+            value: oc describe templates
+          - name: VERSION
+            value: latest
+        taskRef:
+          kind: ClusterTask
+          name: openshift-client
+      - name: clean-dbmigrator-jobs
+        params:
+          - name: SCRIPT
+            value: 'oc delete jobs unity-dbmigrator '
+          - name: VERSION
+            value: latest
+        runAfter:
+          - describe-templates
+        taskRef:
+          kind: ClusterTask
+          name: openshift-client
+      - name: run-dbmigrator-job
+        params:
+          - name: SCRIPT
+            value: >-
+              oc process unity-dbmigrator-job -p ENV_NAME=${ENV_NAME}  -p
+              PROJECT_NAMESPACE=${PROJECT_NAMESPACE} | oc create -f -
+          - name: VERSION
+            value: latest
+        runAfter:
+          - clean-dbmigrator-jobs
+          - start-build-unity-dbmigrator
+        taskRef:
+          kind: ClusterTask
+          name: openshift-client
+      - name: start-build-unity-web
+        params:
+          - name: SCRIPT
+            value: oc start-build unity-web --follow
+          - name: VERSION
+            value: latest
+        runAfter:
+          - describe-templates
+        taskRef:
+          kind: ClusterTask
+          name: openshift-client
+      - name: start-build-unity-dbmigrator
+        params:
+          - name: SCRIPT
+            value: oc start-build unity-dbmigrator --follow
+          - name: VERSION
+            value: latest
+        runAfter:
+          - start-build-unity-web
+        taskRef:
+          kind: ClusterTask
+          name: openshift-client
+
