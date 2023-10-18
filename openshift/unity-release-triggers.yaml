@@ -32,7 +32,6 @@ parameters:
   name: ENV_NAME
   required: true
   value: "dev"
-# Additional parameters for project application provisioning.
 - description: The name of the application grouping.
   displayName: Application Group
   name: APPLICATION_GROUP
@@ -42,12 +41,14 @@ parameters:
   name: APPLICATION_NAME
   required: true
   value: unity-release
+# Additional parameters for project application provisioning.
 - description: Pipeline trigger token (Incomming Webhook)
   displayName: Webhook token
   from: '[a-zA-Z0-9]{26}'
   generate: expression
   name: PIPELINE_TOKEN
   required: true
+# Template objects to instantiate the project.
 objects:
 # Secrets 
 - apiVersion: v1
@@ -67,6 +68,12 @@ objects:
   kind: TriggerTemplate
   metadata:
     name: unity
+    labels:
+      app: ${APPLICATION_NAME}
+      app.kubernetes.io/component: ${APPLICATION_NAME}
+      app.kubernetes.io/instance: ${APPLICATION_NAME}-${ENV_NAME}
+      app.kubernetes.io/name: ${APPLICATION_NAME}
+      app.kubernetes.io/part-of: ${APPLICATION_GROUP}
   spec:
     params:
       - description: The semantic version identifier
@@ -98,6 +105,12 @@ objects:
   kind: TriggerBinding
   metadata:
     name: unity
+    labels:
+      app: ${APPLICATION_NAME}
+      app.kubernetes.io/component: ${APPLICATION_NAME}
+      app.kubernetes.io/instance: ${APPLICATION_NAME}-${ENV_NAME}
+      app.kubernetes.io/name: ${APPLICATION_NAME}
+      app.kubernetes.io/part-of: ${APPLICATION_GROUP}
   spec:
     params:
       - name: imagetag
@@ -109,6 +122,12 @@ objects:
   kind: EventListener
   metadata:
     name: unity
+    labels:
+      app: ${APPLICATION_NAME}
+      app.kubernetes.io/component: ${APPLICATION_NAME}
+      app.kubernetes.io/instance: ${APPLICATION_NAME}-${ENV_NAME}
+      app.kubernetes.io/name: ${APPLICATION_NAME}
+      app.kubernetes.io/part-of: ${APPLICATION_GROUP}
   spec:
     serviceAccountName: pipeline
     triggers:
@@ -122,8 +141,12 @@ objects:
   kind: Route
   metadata:
     labels:
-      app.kubernetes.io/managed-by: EventListener
+      app: ${APPLICATION_NAME}
+      app.kubernetes.io/component: ${APPLICATION_NAME}
+      app.kubernetes.io/instance: ${APPLICATION_NAME}-${ENV_NAME}
+      app.kubernetes.io/name: ${APPLICATION_NAME}
       app.kubernetes.io/part-of: ${APPLICATION_GROUP}
+      app.kubernetes.io/managed-by: EventListener
       eventlistener: unity
     name: el-unity
   spec:

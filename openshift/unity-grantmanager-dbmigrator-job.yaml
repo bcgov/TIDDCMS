@@ -32,7 +32,6 @@ parameters:
   name: ENV_NAME
   required: true
   value: "dev"
-# Additional parameters for project application provisioning.
 - description: The name of the application.
   displayName: Application Name
   name: APPLICATION_NAME
@@ -42,6 +41,7 @@ parameters:
   displayName: Application Group
   name: APPLICATION_GROUP
   value: Triggers
+# Additional parameters for project application provisioning.
 - description: The name of the OpenShift Service exposed for the database.
   displayName: Database Service Name
   name: DATABASE_SERVICE_NAME
@@ -52,6 +52,7 @@ parameters:
   name: IMAGE_STREAM_TAG
   required: true
   value: latest
+# Template objects to instantiate the project.
 objects:
 # RunOnce Job for Database Migrator
 - apiVersion: batch/v1

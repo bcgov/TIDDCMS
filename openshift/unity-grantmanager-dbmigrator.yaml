@@ -32,7 +32,6 @@ parameters:
   name: ENV_NAME
   required: true
   value: "dev"
-# Additional parameters for project application provisioning.
 - description: The name of the application.
   displayName: Application Name
   name: APPLICATION_NAME
@@ -42,6 +41,7 @@ parameters:
   displayName: Application Group
   name: APPLICATION_GROUP
   value: unity-grantmanager
+# Additional parameters for project application provisioning.
 - description: The version of the image to use, e.g. v1.0.0, v0.1.0, latest the ImageStream tag.
   displayName: Application Version
   name: IMAGE_STREAM_TAG
@@ -72,6 +72,7 @@ parameters:
   generate: expression
   name: GENERIC_WEBHOOK_SECRET
   required: true
+# Template objects to instantiate the project.
 objects:
 # Secrets 
 - apiVersion: v1

@@ -11,24 +11,39 @@ metadata:
     description: |-
       Template for commuication rules in OpenShift.
 parameters:
-  # Common project parameters
-  - name: PROJECT_NAMESPACE
-    displayName: "Project Namespace"
-    description: "The OpenShift project license plate 6 charater alpha numberic."
-    required: true
-    generate: expression
-    from: "[a-z0-9]{6}"
-  - name: ENV_NAME
-    displayName: "Environment name"
-    description: "The OpenShift environment name [tools, dev, test, prod]."
-    required: true
-    value: "tools"
-  # Additional parameters (Optional)
+# Common project parameters
+- name: PROJECT_NAMESPACE
+  displayName: "Project Namespace"
+  description: "The OpenShift project license plate 6 charater alpha numberic."
+  required: true
+  generate: expression
+  from: "[a-z0-9]{6}"
+- name: ENV_NAME
+  displayName: "Environment name"
+  description: "The OpenShift environment name [tools, dev, test, prod]."
+  required: true
+  value: "tools"
+- description: The name of the application grouping.
+  displayName: Application Group
+  name: APPLICATION_GROUP
+  value: unity-grantmanager
+- description: The name of the application.
+  displayName: Application Name
+  name: APPLICATION_NAME
+  required: true
+  value: unity-grantmanager-web
+# Template objects to instantiate the project application.
 objects:
   - kind: NetworkPolicy
     apiVersion: networking.k8s.io/v1
     metadata:
       name: deny-by-default
+      labels:
+        app: ${APPLICATION_NAME}
+        app.kubernetes.io/component: ${APPLICATION_NAME}
+        app.kubernetes.io/instance: ${APPLICATION_NAME}-${ENV_NAME}
+        app.kubernetes.io/name: ${APPLICATION_NAME}
+        app.kubernetes.io/part-of: ${APPLICATION_GROUP}
     spec:
       # The default posture for a security first namespace is to
       # deny all traffic. If not added this rule will be added
@@ -39,6 +54,12 @@ objects:
     kind: NetworkPolicy
     metadata:
       name: allow-from-openshift-ingress
+      labels:
+        app: ${APPLICATION_NAME}
+        app.kubernetes.io/component: ${APPLICATION_NAME}
+        app.kubernetes.io/instance: ${APPLICATION_NAME}-${ENV_NAME}
+        app.kubernetes.io/name: ${APPLICATION_NAME}
+        app.kubernetes.io/part-of: ${APPLICATION_GROUP}
     spec:
       # This policy allows any pod with a route & service combination
       # to accept traffic from the OpenShift router pods. This is
@@ -56,6 +77,12 @@ objects:
     apiVersion: networking.k8s.io/v1
     metadata:
       name: allow-same-namespace
+      labels:
+        app: ${APPLICATION_NAME}
+        app.kubernetes.io/component: ${APPLICATION_NAME}
+        app.kubernetes.io/instance: ${APPLICATION_NAME}-${ENV_NAME}
+        app.kubernetes.io/name: ${APPLICATION_NAME}
+        app.kubernetes.io/part-of: ${APPLICATION_GROUP}
     spec:
       # Allow all pods within the current namespace to communicate
       # to one another.
