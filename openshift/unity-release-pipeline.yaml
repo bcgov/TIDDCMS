@@ -95,7 +95,7 @@ objects:
       - name: start-build-unity-dbmigrator
         params:
           - name: SCRIPT
-            value: oc start-build unity-dbmigrator --follow
+            value: oc start-build unity-grantmanager-dbmigrator --follow
           - name: VERSION
             value: latest
         runAfter:
