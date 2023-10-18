@@ -59,7 +59,7 @@ objects:
       - name: clean-dbmigrator-jobs
         params:
           - name: SCRIPT
-            value: 'oc delete jobs unity-dbmigrator '
+            value: 'oc delete jobs unity-grantmanager-dbmigrator '
           - name: VERSION
             value: latest
         runAfter:
@@ -71,7 +71,7 @@ objects:
         params:
           - name: SCRIPT
             value: >-
-              oc process unity-dbmigrator-job -p ENV_NAME=${ENV_NAME}  -p
+              oc process unity-grantmanager-dbmigrator-job -p ENV_NAME=${ENV_NAME}  -p
               PROJECT_NAMESPACE=${PROJECT_NAMESPACE} | oc create -f -
           - name: VERSION
             value: latest
@@ -81,10 +81,10 @@ objects:
         taskRef:
           kind: ClusterTask
           name: openshift-client
-      - name: start-build-unity-web
+      - name: start-build-unity-grantmanager-web
         params:
           - name: SCRIPT
-            value: oc start-build unity-web --follow
+            value: oc start-build unity-grantmanager-web --follow
           - name: VERSION
             value: latest
         runAfter:
@@ -99,7 +99,7 @@ objects:
           - name: VERSION
             value: latest
         runAfter:
-          - start-build-unity-web
+          - start-build-unity-grantmanager-web
         taskRef:
           kind: ClusterTask
           name: openshift-client
