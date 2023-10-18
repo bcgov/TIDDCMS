@@ -48,6 +48,12 @@ objects:
   kind: Pipeline
   metadata:
     name: unity-grantmanger-dbmigrator
+    labels:
+      app: ${APPLICATION_NAME}
+      app.kubernetes.io/component: ${APPLICATION_NAME}
+      app.kubernetes.io/instance: ${APPLICATION_NAME}-${ENV_NAME}
+      app.kubernetes.io/name: ${APPLICATION_NAME}
+      app.kubernetes.io/part-of: ${APPLICATION_GROUP}
   spec:
     params:
       - description: The semantic version identifier
