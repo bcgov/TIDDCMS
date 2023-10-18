@@ -32,12 +32,28 @@ parameters:
   name: ENV_NAME
   required: true
   value: "dev"
+- description: The name of the application grouping.
+  displayName: Application Group
+  name: APPLICATION_GROUP
+  value: unity-grantmanager
+- description: The name of the application.
+  displayName: Application Name
+  name: APPLICATION_NAME
+  required: true
+  value: unity-grantmanager-dbmigrator
+# Template objects to instantiate the project.
 objects:
 # Pipeline for Database Migrator
 - apiVersion: tekton.dev/v1beta1
   kind: Pipeline
   metadata:
     name: unity-grantmanger-dbmigrator
+    labels:
+      app: ${APPLICATION_NAME}
+      app.kubernetes.io/component: ${APPLICATION_NAME}
+      app.kubernetes.io/instance: ${APPLICATION_NAME}-${ENV_NAME}
+      app.kubernetes.io/name: ${APPLICATION_NAME}
+      app.kubernetes.io/part-of: ${APPLICATION_GROUP}
   spec:
     params:
       - description: The semantic version identifier

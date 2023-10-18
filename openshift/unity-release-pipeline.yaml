@@ -32,12 +32,28 @@ parameters:
   name: ENV_NAME
   required: true
   value: "dev"
+- description: The name of the application grouping.
+  displayName: Application Group
+  name: APPLICATION_GROUP
+  value: unity-grantmanager
+- description: The name of the application.
+  displayName: Application Name
+  name: APPLICATION_NAME
+  required: true
+  value: unity-grantmanager-web
+# Template objects to instantiate the project.
 objects:
 # Pipeline for Database Migrator
 - apiVersion: tekton.dev/v1beta1
   kind: Pipeline
   metadata:
     name: unity-release
+    labels:
+      app: ${APPLICATION_NAME}
+      app.kubernetes.io/component: ${APPLICATION_NAME}
+      app.kubernetes.io/instance: ${APPLICATION_NAME}-${ENV_NAME}
+      app.kubernetes.io/name: ${APPLICATION_NAME}
+      app.kubernetes.io/part-of: ${APPLICATION_GROUP}
   spec:
     params:
       - description: The semantic version identifier
@@ -59,7 +75,7 @@ objects:
       - name: clean-dbmigrator-jobs
         params:
           - name: SCRIPT
-            value: 'oc delete jobs unity-dbmigrator '
+            value: 'oc delete jobs unity-grantmanager-dbmigrator '
           - name: VERSION
             value: latest
         runAfter:
@@ -71,7 +87,7 @@ objects:
         params:
           - name: SCRIPT
             value: >-
-              oc process unity-dbmigrator-job -p ENV_NAME=${ENV_NAME}  -p
+              oc process unity-grantmanager-dbmigrator-job -p ENV_NAME=${ENV_NAME}  -p
               PROJECT_NAMESPACE=${PROJECT_NAMESPACE} | oc create -f -
           - name: VERSION
             value: latest
@@ -81,10 +97,10 @@ objects:
         taskRef:
           kind: ClusterTask
           name: openshift-client
-      - name: start-build-unity-web
+      - name: start-build-unity-grantmanager-web
         params:
           - name: SCRIPT
-            value: oc start-build unity-web --follow
+            value: oc start-build unity-grantmanager-web --follow
           - name: VERSION
             value: latest
         runAfter:
@@ -95,11 +111,11 @@ objects:
       - name: start-build-unity-dbmigrator
         params:
           - name: SCRIPT
-            value: oc start-build unity-dbmigrator --follow
+            value: oc start-build unity-grantmanager-dbmigrator --follow
           - name: VERSION
             value: latest
         runAfter:
-          - start-build-unity-web
+          - start-build-unity-grantmanager-web
         taskRef:
           kind: ClusterTask
           name: openshift-client
