@@ -12,8 +12,8 @@ on:
     
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "greet"
-  greet:
+  # This workflow contains a single job called "New_Tag"
+  new_tag:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
 
@@ -43,7 +43,7 @@ jobs:
       run: |
         git config user.name "GitHub Actions"
         git config user.email "github-actions@users.noreply.github.com"
-        git tag $NEW_TAG
+        git tag $NEW_TAG -m "TIDDCMS_$NEW_TAG"
         git push origin $NEW_TAG
 
     # Add your build, test, and deploy steps here
