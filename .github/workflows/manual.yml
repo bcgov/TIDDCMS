@@ -22,6 +22,10 @@ jobs:
     # Runs a single command using the runners shell
     - name: Send greeting
       run: echo "Hello "
+    - name: Checkout repository
+      uses: actions/checkout@v2
+      with:
+          fetch-depth: '0'
     - name: Generate Git Tag
       id: generate_tag
       run: |
