@@ -39,6 +39,7 @@ jobs:
         NEW_TAG="${VERSION_PREFIX}${VERSION_MAJOR_MINOR}.${VERSION_PATCH}"
         echo "Generated new tag: $NEW_TAG"
         echo "NEW_TAG=$NEW_TAG" >> $GITHUB_ENV
+        echo "TAG_MESSAGE=Dev to Test - ${{ steps.date.outputs.date }}" >> $GITHUB_ENV
     - name: Test with environment variables
       run: echo Tag $TAG_NAME Message $TAG_MESSAGE
       env:
