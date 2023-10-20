@@ -40,11 +40,13 @@ jobs:
         fi
         NEW_TAG="${VERSION_PREFIX}${VERSION_MAJOR_MINOR}.${VERSION_PATCH}"
         echo "Generated new tag: $NEW_TAG"
-        echo "NEW_TAG=$NEW_TAG" >> $GITHUB_OUTPUT
+        # echo "NEW_TAG=$NEW_TAG" >> $GITHUB_ENV
+        env:
+          NEW_TAG: $NEW_TAG
     - name: Test with environment variables
       run: echo Tag $TAG_NAME Message $TAG_MESSAGE
       env:
-        TAG_NAME: TIDDCMS_${{ steps.geberate_tag.outputs.NEW_TAG }}
+        TAG_NAME: TIDDCMS_$NEW_TAG
         TAG_MESSAGE: Dev to Test - ${{ steps.date.outputs.date }}
     - name: Push Git Tag
       run: |
