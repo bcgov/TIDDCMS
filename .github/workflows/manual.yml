@@ -46,6 +46,7 @@ jobs:
         TAG_MESSAGE: Dev to Test - ${{ steps.date.outputs.date }}
     - name: Push Git Tag
       run: |
+        env
         git config user.name "GitHub Actions"
         git config user.email "github-actions@users.noreply.github.com"
         git tag $NEW_TAG # -m $TAG_MESSAGE
