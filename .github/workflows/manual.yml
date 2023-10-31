@@ -1,9 +1,8 @@
 # This is a basic workflow that is manually triggered
 
-name: Manual workflow
+name: Manual Tag Workflow
 
-# Controls when the action will run. Workflow runs when manually triggered using the UI
-# or API.
+# Controls when the action will run. Workflow runs when manually triggered using the UI or API.
 on:
   workflow_dispatch:
   # Allows external webhook trigger
