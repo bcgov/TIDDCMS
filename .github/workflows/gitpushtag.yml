@@ -14,7 +14,6 @@ jobs:
     runs-on: ubuntu-latest
     outputs: 
       TAGNAME: ${{ steps.nexttag.outputs.gittag }}
-      TAGDATE: ${{ steps.date.outputs.date }}
       TAGMESSAGE: ${{ steps.nexttag.outputs.tagmsg }}
     steps:
     - name: Checkout repository
@@ -27,7 +26,7 @@ jobs:
     - name: Generate Next Git Tag
       id: nexttag
       run: |
-        VERSION_PREFIX="v"
+        VERSION_PREFIX="Release_v"
         VERSION_MAJOR_MINOR="0.1"
         VERSION_PATCH=$(git tag --list "${VERSION_PREFIX}${VERSION_MAJOR_MINOR}.*" --sort=-version:refname | head -n 1 | grep -oE '[0-9]+$')
         if [ -z "$VERSION_PATCH" ]; then
@@ -53,8 +52,8 @@ jobs:
       run: |
         git config user.name "GitHub Actions"
         git config user.email "github-actions@users.noreply.github.com"
-        git tag Release_${{env.TAGNAME}} -m "${{env.TAGMESSAGE}}"
-        git push origin Release_${{env.TAGNAME}}
+        git tag ${{env.TAGNAME}} -m "${{env.TAGMESSAGE}}"
+        git push origin ${{env.TAGNAME}}
   PushTeamsAlert:
     needs: [GenerateTag, PushTag]
     runs-on: ubuntu-latest
@@ -65,4 +64,4 @@ jobs:
         TAGMESSAGE: ${{needs.GenerateTag.outputs.TAGMESSAGE}}
       run: |
         echo tag $gittag -m "$tagmsg"
-        curl -H "Content-Type: application/json" --data-raw "{\"text\":\"Release_${{env.TAGNAME}} ${{env.TAGMESSAGE}}\"}" -X POST -k https://bcgov.webhook.office.com/webhookb2/fa08bb89-7d55-40d9-a468-d33f44399a61@6fdb5200-3d0d-4a8a-b036-d3685e359adc/IncomingWebhook/9558b1d617674555abc2cc276f9c958e/730754e7-686e-4bfa-b646-16afda18661b
+        curl -H "Content-Type: application/json" --data-raw "{\"text\":\"${{env.TAGNAME}} ${{env.TAGMESSAGE}}\"}" -X POST -k https://bcgov.webhook.office.com/webhookb2/fa08bb89-7d55-40d9-a468-d33f44399a61@6fdb5200-3d0d-4a8a-b036-d3685e359adc/IncomingWebhook/9558b1d617674555abc2cc276f9c958e/730754e7-686e-4bfa-b646-16afda18661b
