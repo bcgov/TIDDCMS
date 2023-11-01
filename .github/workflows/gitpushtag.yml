@@ -43,7 +43,7 @@ jobs:
         git config user.name "GitHub Actions"
         git config user.email "github-actions@users.noreply.github.com"
         git tag ${{ steps.generate_tag.outputs.NEW_TAG }} -m "${{ steps.generate_tag.outputs.TAG_MESSAGE }}"
-        git push origin${{ steps.generate_tag.outputs.NEW_TAG }}
+        git push origin ${{ steps.generate_tag.outputs.NEW_TAG }}
   PushTagAlert:
     needs: GenerateTag
     runs-on: ubuntu-latest
