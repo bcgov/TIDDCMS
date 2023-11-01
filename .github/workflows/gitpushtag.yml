@@ -26,7 +26,7 @@ jobs:
     - name: Generate Next Git Tag
       id: nexttag
       run: |
-        VERSION_PREFIX="Release_v"
+        VERSION_PREFIX="v"
         VERSION_MAJOR_MINOR="0.1"
         VERSION_PATCH=$(git tag --list "${VERSION_PREFIX}${VERSION_MAJOR_MINOR}.*" --sort=-version:refname | head -n 1 | grep -oE '[0-9]+$')
         if [ -z "$VERSION_PATCH" ]; then
