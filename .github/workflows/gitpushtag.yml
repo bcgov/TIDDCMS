@@ -1,0 +1,46 @@
+# This is a workflow that is manually UI or API triggered
+
+name: Tag and Notify Teams
+# Controls when the action will run. Workflow runs when triggered using the UI or API.
+on:
+  workflow_dispatch:
+  # Allows external webhook triggering
+  repository_dispatch:
+    types: [webhook]
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a job called "GenerateTag"
+  GenerateTag:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+          fetch-depth: '0'
+    - name: Get current date
+      id: date
+      run: echo "date=$(date +'%B %e, %Y')" >> $GITHUB_OUTPUT
+    - name: Generate Git Tag
+      id: generate_tag
+      run: |
+        VERSION_PREFIX="v"
+        VERSION_MAJOR_MINOR="0.1"
+        VERSION_PATCH=$(git tag --list "${VERSION_PREFIX}${VERSION_MAJOR_MINOR}.*" --sort=-version:refname | head -n 1 | grep -oE '[0-9]+$')
+        if [ -z "$VERSION_PATCH" ]; then
+          VERSION_PATCH=0
+        else
+          VERSION_PATCH=$((VERSION_PATCH + 1))
+        fi
+        NEW_TAG="${VERSION_PREFIX}${VERSION_MAJOR_MINOR}.${VERSION_PATCH}"
+        echo "NEW_TAG=$NEW_TAG" >> $GITHUB_ENV
+        echo "TAG_MESSAGE=Dev to Test - ${{ steps.date.outputs.date }}" >> $GITHUB_ENV
+    - name: Push Git Tag
+      run: |
+        git config user.name "GitHub Actions"
+        git config user.email "github-actions@users.noreply.github.com"
+        git tag $NEW_TAG -m "$TAG_MESSAGE"
+        git push origin $NEW_TAG
+    - name: Push Alert to Teams Webhook
+      run: |
+        echo tag $NEW_TAG -m "$TAG_MESSAGE"
+        curl -H "Content-Type: application/json" --data-raw "{\"text\":\"Release_${{env.NEW_TAG}} ${{env.TAG_MESSAGE}}\"}" -X POST -k https://bcgov.webhook.office.com/webhookb2/fa08bb89-7d55-40d9-a468-d33f44399a61@6fdb5200-3d0d-4a8a-b036-d3685e359adc/IncomingWebhook/9558b1d617674555abc2cc276f9c958e/730754e7-686e-4bfa-b646-16afda18661b
