@@ -42,7 +42,10 @@ jobs:
     needs: [GenerateTag]
     runs-on: ubuntu-latest
     steps:
-    - name: Push Git Tag
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+          fetch-depth: '0'   - name: Push Git Tag
       env:
         TAGNAME: ${{needs.GenerateTag.outputs.TAGNAME}}
         TAGMESSAGE: ${{needs.GenerateTag.outputs.TAGMESSAGE}}
@@ -51,7 +54,7 @@ jobs:
         git config user.email "github-actions@users.noreply.github.com"
         git tag ${{ steps.nexttag.outputs.gittag }} -m "${{ steps.nexttag.outputs.tagmsg }}"
         git push origin ${{ steps.nexttag.outputs.gittag }}
-  PushTagAlert:
+  PushTeamsAlert:
     needs: [GenerateTag, PushTag]
     runs-on: ubuntu-latest
     steps:
