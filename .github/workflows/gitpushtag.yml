@@ -66,8 +66,7 @@ jobs:
       working-directory: ./applications/Unity.GrantManager
     - name: Connect to OpenShift API
       run: |
-        oc login --token=$AUTH_TOKEN --server=$CLUSTER
-        oc project $TARGET_PROJECT-$TARGET_ENV
+        oc login --token=${{secrets.OPENSHIFT_TOKEN_TEST}} --server=https://api.silver.devops.gov.bc.ca:6443
         oc registry login
     - name: Push application images to OpenShift container registry
       run: | 
