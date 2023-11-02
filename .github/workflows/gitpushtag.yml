@@ -76,9 +76,9 @@ jobs:
         echo "project=${PROJECT}" >> $GITHUB_OUTPUT
     - name: Push application images to OpenShift container registry
       run: | 
-        echo "project =${{steps.project.outputs.PROJECT}}
-        docker tag unity-grantmanager-dbmigrator image-registry.apps.silver.devops.gov.bc.ca/c57ee7-test/unity-grantmanager-dbmigrator:${{needs.GenerateTag.outputs.IMAGETAG}}
-        docker push image-registry.apps.silver.devops.gov.bc.ca/c57ee7-test/unity-grantmanager-dbmigrator:${{needs.GenerateTag.outputs.IMAGETAG}}
+        echo project = ${{steps.project.outputs.PROJECT}}
+        docker tag unity-grantmanager-dbmigrator image-registry.apps.silver.devops.gov.bc.ca/${{steps.project.outputs.PROJECT}}/unity-grantmanager-dbmigrator:${{needs.GenerateTag.outputs.IMAGETAG}}
+        docker push image-registry.apps.silver.devops.gov.bc.ca/${{steps.project.outputs.PROJECT}}/unity-grantmanager-dbmigrator:${{needs.GenerateTag.outputs.IMAGETAG}}
   PushAlert:
     needs: [GenerateTag, PushTag, Build]
     runs-on: ubuntu-latest
