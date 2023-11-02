@@ -57,6 +57,8 @@ jobs:
   Build:
     needs: [GenerateTag, PushTag]
     runs-on: ubuntu-latest
+    outputs: 
+      PROJECT: ${{steps.project.outputs.TARGET_PROJECT}}
     steps:
     - uses: actions/checkout@v3
     - name: Build application Docker images
@@ -65,15 +67,16 @@ jobs:
         docker compose build
       working-directory: ./applications/Unity.GrantManager
     - name: Connect to OpenShift API
+      id: project
       # Change the target project license suffix and OpenShift service account token together 
       run: |
         oc login --token=${{secrets.OPENSHIFT_TOKEN_TEST}} --server=${{vars.OPENSHIFT_CLUSTER}}
-        TARGET_PROJECT=$(oc project | grep -oE '[0-9a-z]*-test')
+        PROJECT=$(oc project | grep -oE '[0-9a-z]*-test')
         oc registry login
-        echo "project=${TARGET_PROJECT}" >> $GITHUB_OUTPUT
+        echo "project=${PROJECT}" >> $GITHUB_OUTPUT
     - name: Push application images to OpenShift container registry
       run: | 
-        echo "project = ${TARGET_PROJECT}"
+        echo "project =${{steps.project.outputs.PROJECT}}
         docker tag unity-grantmanager-dbmigrator image-registry.apps.silver.devops.gov.bc.ca/c57ee7-test/unity-grantmanager-dbmigrator:${{needs.GenerateTag.outputs.IMAGETAG}}
         docker push image-registry.apps.silver.devops.gov.bc.ca/c57ee7-test/unity-grantmanager-dbmigrator:${{needs.GenerateTag.outputs.IMAGETAG}}
   PushAlert:
