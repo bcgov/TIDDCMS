@@ -69,10 +69,11 @@ jobs:
       run: |
         oc login --token=${{secrets.OPENSHIFT_TOKEN_TEST}} --server=${{vars.OPENSHIFT_CLUSTER}}
         TARGET_PROJECT=$(oc project | grep -oE '[0-9a-z]*-test')
-        echo $TARGET_PROJECT
         oc registry login
+        echo "project=${TARGET_PROJECT}" >> $GITHUB_OUTPUT
     - name: Push application images to OpenShift container registry
       run: | 
+        echo "project = ${TARGET_PROJECT}"
         docker tag unity-grantmanager-dbmigrator image-registry.apps.silver.devops.gov.bc.ca/c57ee7-test/unity-grantmanager-dbmigrator:${{needs.GenerateTag.outputs.IMAGETAG}}
         docker push image-registry.apps.silver.devops.gov.bc.ca/c57ee7-test/unity-grantmanager-dbmigrator:${{needs.GenerateTag.outputs.IMAGETAG}}
   PushAlert:
