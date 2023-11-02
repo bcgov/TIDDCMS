@@ -1,4 +1,6 @@
-# This is a workflow that is manually UI or API triggered
+# This is a workflow that is manually UI or API or webhook triggered
+# Repository secrets MSTEAMSWEBHOOK https://bcgov.webhook.office.com/webhookb2/...
+# Repository variables VERSION_MAJOR_MINOR 0.1 VERSION_MESSAGE Dev to Test - VERSION_PREFIX v
 
 name: Tag and Notify Teams
 # Controls when the action will run. Workflow runs when triggered using the UI or API.
@@ -7,9 +9,8 @@ on:
   # Allows external webhook triggering
   repository_dispatch:
     types: [webhook]
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a job called "GenerateTag"
+  # This workflow contains a jobs called "GenerateTag" "PushTag" "PushTeamsAlert"
   GenerateTag:
     runs-on: ubuntu-latest
     outputs: 
@@ -58,10 +59,9 @@ jobs:
     needs: [GenerateTag, PushTag]
     runs-on: ubuntu-latest
     steps:
-    - name: Push Alert to Teams Channel
+    - name: Push Alert to MS Teams Channel
       env:
         TAGNAME: ${{needs.GenerateTag.outputs.TAGNAME}}
         TAGMESSAGE: ${{needs.GenerateTag.outputs.TAGMESSAGE}}
       run: |
-        echo tag $gittag -m "$tagmsg"
         curl -H "Content-Type: application/json" --data-raw "{\"text\":\"${{env.TAGNAME}} ${{env.TAGMESSAGE}}\"}" -X POST -k ${{ secrets.MSTEAMSWEBHOOK }}
