@@ -2,7 +2,7 @@
 # Repository secrets MSTEAMSWEBHOOK https://bcgov.webhook.office.com/webhookb2/...
 # Repository variables VERSION_MAJOR_MINOR 0.1 VERSION_MESSAGE Dev to Test - VERSION_PREFIX v
 
-name: Tag and Notify Teams
+name: Tag and Alert
 # Controls when the action will run. Workflow runs when triggered using the UI or API.
 on:
   workflow_dispatch:
@@ -10,7 +10,7 @@ on:
   repository_dispatch:
     types: [webhook]
 jobs:
-  # This workflow contains a jobs called "GenerateTag" "PushTag" "PushTeamsAlert"
+  # This workflow contains a jobs called "GenerateTag" "PushTag" "PushAlert"
   GenerateTag:
     runs-on: ubuntu-latest
     outputs: 
@@ -52,11 +52,11 @@ jobs:
         git config user.email "github-actions@users.noreply.github.com"
         git tag ${{env.TAGNAME}} -m "${{env.TAGMESSAGE}}"
         git push origin ${{env.TAGNAME}}
-  PushTeamsAlert:
+  PushAlert:
     needs: [GenerateTag, PushTag]
     runs-on: ubuntu-latest
     steps:
-    - name: Push Alert to MS Teams Channel
+    - name: Push Alert to MS Teams Channel Webhook
       env:
         TAGNAME: ${{needs.GenerateTag.outputs.TAGNAME}}
         TAGMESSAGE: ${{needs.GenerateTag.outputs.TAGMESSAGE}}
