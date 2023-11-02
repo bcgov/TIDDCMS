@@ -5,6 +5,7 @@
 name: Tag and Alert
 # Controls when the action will run. Workflow runs when triggered using the UI or API.
 on:
+  # Allows manual triggering
   workflow_dispatch:
   # Allows external webhook triggering
   repository_dispatch:
@@ -19,7 +20,7 @@ env:
   TEAMS_WEBHOOK: ${{secrets.TEAMSWEBHOOK}}
 
 jobs:
-  # This workflow contains a jobs called "GenerateTag" "PushTag" "PushAlert"
+  # This workflow contains a jobs called "GenerateTag" "PushTag" "Build" "PushAlert"
   GenerateTag:
     runs-on: ubuntu-latest
     outputs: 
