@@ -26,8 +26,8 @@ jobs:
     - name: Generate Next Git Tag
       id: nexttag
       run: |
-        VERSION_PREFIX="v"
-        VERSION_MAJOR_MINOR="0.1"
+        VERSION_PREFIX=${{ vars.VERSION_PREFIX }}
+        VERSION_MAJOR_MINOR=${{ vars.VERSION_MAJOR_MINOR }}
         VERSION_PATCH=$(git tag --list "${VERSION_PREFIX}${VERSION_MAJOR_MINOR}.*" --sort=-version:refname | head -n 1 | grep -oE '[0-9]+$')
         if [ -z "$VERSION_PATCH" ]; then
           VERSION_PATCH=0
@@ -36,7 +36,7 @@ jobs:
         fi
         gittag="${VERSION_PREFIX}${VERSION_MAJOR_MINOR}.${VERSION_PATCH}"
         echo "gittag=$gittag" >> $GITHUB_OUTPUT
-        echo "tagmsg=Dev to Test - ${{ steps.date.outputs.date }}" >> $GITHUB_OUTPUT
+        echo "tagmsg=${{ vars.VERSION_MESSAGE }} ${{ steps.date.outputs.date }}" >> $GITHUB_OUTPUT
   PushTag:
     needs: [GenerateTag]
     runs-on: ubuntu-latest
@@ -64,4 +64,4 @@ jobs:
         TAGMESSAGE: ${{needs.GenerateTag.outputs.TAGMESSAGE}}
       run: |
         echo tag $gittag -m "$tagmsg"
-        curl -H "Content-Type: application/json" --data-raw "{\"text\":\"${{env.TAGNAME}} ${{env.TAGMESSAGE}}\"}" -X POST -k https://bcgov.webhook.office.com/webhookb2/fa08bb89-7d55-40d9-a468-d33f44399a61@6fdb5200-3d0d-4a8a-b036-d3685e359adc/IncomingWebhook/9558b1d617674555abc2cc276f9c958e/730754e7-686e-4bfa-b646-16afda18661b
+        curl -H "Content-Type: application/json" --data-raw "{\"text\":\"${{env.TAGNAME}} ${{env.TAGMESSAGE}}\"}" -X POST -k ${{ secrets.MSTEAMSWEBHOOK }}
