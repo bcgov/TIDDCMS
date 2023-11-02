@@ -14,9 +14,9 @@ jobs:
   GenerateTag:
     runs-on: ubuntu-latest
     outputs: 
-      TAGNAME: ${{ steps.nexttag.outputs.gittag }}
-      IMAGETAG: ${{ steps.nexttag.outputs.imagetag }}
-      TAGMESSAGE: ${{ steps.nexttag.outputs.tagmsg }}
+      TAGNAME: ${{steps.nexttag.outputs.gittag}}
+      IMAGETAG: ${{steps.nexttag.outputs.imagetag}}
+      TAGMESSAGE: ${{steps.nexttag.outputs.tagmsg}}
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
@@ -28,15 +28,15 @@ jobs:
     - name: Generate Next Git Tag
       id: nexttag
       run: |
-        VERSION_PATCH=$(git tag --list "${{ vars.VERSION_PREFIX }}${{ vars.VERSION_MAJOR_MINOR }}.*" --sort=-version:refname | head -n 1 | grep -oE '[0-9]+$')
+        VERSION_PATCH=$(git tag --list "${{vars.VERSION_PREFIX}}${{vars.VERSION_MAJOR_MINOR}}.*" --sort=-version:refname | head -n 1 | grep -oE '[0-9]+$')
         if [ -z "$VERSION_PATCH" ]; then
           VERSION_PATCH=0
         else
           VERSION_PATCH=$((VERSION_PATCH + 1))
         fi
-        echo "gittag=${{ vars.VERSION_PREFIX }}${{ vars.VERSION_MAJOR_MINOR }}.${VERSION_PATCH}" >> $GITHUB_OUTPUT
-        echo "imagetag=v${{ vars.VERSION_MAJOR_MINOR }}.${VERSION_PATCH}" >> $GITHUB_OUTPUT
-        echo "tagmsg=${{ vars.VERSION_MESSAGE }} ${{ steps.date.outputs.date }}" >> $GITHUB_OUTPUT
+        echo "gittag=${{vars.VERSION_PREFIX}}${{vars.VERSION_MAJOR_MINOR}}.${VERSION_PATCH}" >> $GITHUB_OUTPUT
+        echo "imagetag=v${{vars.VERSION_MAJOR_MINOR}}.${VERSION_PATCH}" >> $GITHUB_OUTPUT
+        echo "tagmsg=${{vars.VERSION_MESSAGE}} ${{steps.date.outputs.date}}" >> $GITHUB_OUTPUT
   PushTag:
     needs: [GenerateTag]
     runs-on: ubuntu-latest
@@ -66,11 +66,12 @@ jobs:
       working-directory: ./applications/Unity.GrantManager
     - name: Connect to OpenShift API
       run: |
-        oc login --token=${{secrets.OPENSHIFT_TOKEN_TEST}} --server=https://api.silver.devops.gov.bc.ca:6443
+        oc login --token=${{secrets.OPENSHIFT_TOKEN_TEST}} --server=${{secrets.OPENSHIFT_CLUSTER}}
+        TARGET_PROJECT=$(oc project | grep -oE '[0-9a-z]*-test') 
         oc registry login
     - name: Push application images to OpenShift container registry
       run: | 
-        docker tag unity-grantmanager-dbmigrator image-registry.apps.silver.devops.gov.bc.ca/$TARGET_PROJECT-$TARGET_ENV/unity-grantmanager-dbmigrator:${{needs.GenerateTag.outputs.IMAGETAG}}
+        docker tag unity-grantmanager-dbmigrator image-registry.apps.silver.devops.gov.bc.ca/$TARGET_PROJECT/unity-grantmanager-dbmigrator:${{needs.GenerateTag.outputs.IMAGETAG}}
         docker push image-registry.apps.silver.devops.gov.bc.ca/$TARGET_PROJECT-$TARGET_ENV/unity-grantmanager-dbmigrator:${{needs.GenerateTag.outputs.IMAGETAG}}
   PushAlert:
     needs: [GenerateTag, PushTag, Build]
@@ -81,4 +82,4 @@ jobs:
         TAGNAME: ${{needs.GenerateTag.outputs.TAGNAME}}
         TAGMESSAGE: ${{needs.GenerateTag.outputs.TAGMESSAGE}}
       run: |
-        curl -H "Content-Type: application/json" --data-raw "{\"text\":\"${{env.TAGNAME}} ${{env.TAGMESSAGE}}\"}" -X POST -k ${{ secrets.MSTEAMSWEBHOOK }}
+        curl -H "Content-Type: application/json" --data-raw "{\"text\":\"${{env.TAGNAME}} ${{env.TAGMESSAGE}}\"}" -X POST -k ${{secrets.MSTEAMSWEBHOOK}}
