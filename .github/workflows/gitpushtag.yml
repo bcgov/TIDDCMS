@@ -27,15 +27,13 @@ jobs:
     - name: Generate Next Git Tag
       id: nexttag
       run: |
-        VERSION_PREFIX=${{ vars.VERSION_PREFIX }}
-        VERSION_MAJOR_MINOR=${{ vars.VERSION_MAJOR_MINOR }}
-        VERSION_PATCH=$(git tag --list "${VERSION_PREFIX}${VERSION_MAJOR_MINOR}.*" --sort=-version:refname | head -n 1 | grep -oE '[0-9]+$')
+        VERSION_PATCH=$(git tag --list "${{ vars.VERSION_PREFIX }}${{ vars.VERSION_MAJOR_MINOR }}.*" --sort=-version:refname | head -n 1 | grep -oE '[0-9]+$')
         if [ -z "$VERSION_PATCH" ]; then
           VERSION_PATCH=0
         else
           VERSION_PATCH=$((VERSION_PATCH + 1))
         fi
-        echo "gittag=${VERSION_PREFIX}${VERSION_MAJOR_MINOR}.${VERSION_PATCH}" >> $GITHUB_OUTPUT
+        echo "gittag=${{ vars.VERSION_PREFIX }}${{ vars.VERSION_MAJOR_MINOR }}.${VERSION_PATCH}" >> $GITHUB_OUTPUT
         echo "tagmsg=${{ vars.VERSION_MESSAGE }} ${{ steps.date.outputs.date }}" >> $GITHUB_OUTPUT
   PushTag:
     needs: [GenerateTag]
