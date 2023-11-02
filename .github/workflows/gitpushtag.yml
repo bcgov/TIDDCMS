@@ -35,8 +35,7 @@ jobs:
         else
           VERSION_PATCH=$((VERSION_PATCH + 1))
         fi
-        gittag="${VERSION_PREFIX}${VERSION_MAJOR_MINOR}.${VERSION_PATCH}"
-        echo "gittag=$gittag" >> $GITHUB_OUTPUT
+        echo "gittag=${VERSION_PREFIX}${VERSION_MAJOR_MINOR}.${VERSION_PATCH}" >> $GITHUB_OUTPUT
         echo "tagmsg=${{ vars.VERSION_MESSAGE }} ${{ steps.date.outputs.date }}" >> $GITHUB_OUTPUT
   PushTag:
     needs: [GenerateTag]
