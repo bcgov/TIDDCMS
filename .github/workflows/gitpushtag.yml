@@ -15,6 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs: 
       TAGNAME: ${{ steps.nexttag.outputs.gittag }}
+      IMAGETAG: ${{ steps.nexttag.outputs.imagetag }}
       TAGMESSAGE: ${{ steps.nexttag.outputs.tagmsg }}
     steps:
     - name: Checkout repository
@@ -34,6 +35,7 @@ jobs:
           VERSION_PATCH=$((VERSION_PATCH + 1))
         fi
         echo "gittag=${{ vars.VERSION_PREFIX }}${{ vars.VERSION_MAJOR_MINOR }}.${VERSION_PATCH}" >> $GITHUB_OUTPUT
+        echo "imagetag=v${{ vars.VERSION_MAJOR_MINOR }}.${VERSION_PATCH}" >> $GITHUB_OUTPUT
         echo "tagmsg=${{ vars.VERSION_MESSAGE }} ${{ steps.date.outputs.date }}" >> $GITHUB_OUTPUT
   PushTag:
     needs: [GenerateTag]
@@ -52,8 +54,27 @@ jobs:
         git config user.email "github-actions@users.noreply.github.com"
         git tag ${{env.TAGNAME}} -m "${{env.TAGMESSAGE}}"
         git push origin ${{env.TAGNAME}}
-  PushAlert:
+  Build:
     needs: [GenerateTag, PushTag]
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build application Docker images
+      run: |
+        rm -f ./docker-compose.override.yml
+        docker compose build
+      working-directory: ./applications/Unity.GrantManager
+    - name: Connect to OpenShift API
+      run: |
+        oc login --token=$AUTH_TOKEN --server=$CLUSTER
+        oc project $TARGET_PROJECT-$TARGET_ENV
+        oc registry login
+    - name: Push application images to OpenShift container registry
+      run: | 
+        docker tag unity-grantmanager-dbmigrator image-registry.apps.silver.devops.gov.bc.ca/$TARGET_PROJECT-$TARGET_ENV/unity-grantmanager-dbmigrator:${{needs.GenerateTag.outputs.IMAGETAG}}
+        docker push image-registry.apps.silver.devops.gov.bc.ca/$TARGET_PROJECT-$TARGET_ENV/unity-grantmanager-dbmigrator:${{needs.GenerateTag.outputs.IMAGETAG}}
+  PushAlert:
+    needs: [GenerateTag, PushTag, Build]
     runs-on: ubuntu-latest
     steps:
     - name: Push Alert to MS Teams Channel Webhook
