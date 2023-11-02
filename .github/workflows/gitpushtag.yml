@@ -69,16 +69,17 @@ jobs:
       run: |
         oc login --token=${{secrets.OPENSHIFT_TOKEN_TEST}} --server=${{vars.OPENSHIFT_CLUSTER}}
         TARGET_PROJECT=$(oc project | grep -oE '[0-9a-z]*-test')
+        echo $TARGET_PROJECT
         oc registry login
     - name: Push application images to OpenShift container registry
       run: | 
-        docker tag unity-grantmanager-dbmigrator image-registry.apps.silver.devops.gov.bc.ca/${TARGET_PROJECT}/unity-grantmanager-dbmigrator:${{needs.GenerateTag.outputs.IMAGETAG}}
-        docker push image-registry.apps.silver.devops.gov.bc.ca/$TARGET_PROJECT-$TARGET_ENV/unity-grantmanager-dbmigrator:${{needs.GenerateTag.outputs.IMAGETAG}}
+        docker tag unity-grantmanager-dbmigrator image-registry.apps.silver.devops.gov.bc.ca/c57ee7-test/unity-grantmanager-dbmigrator:${{needs.GenerateTag.outputs.IMAGETAG}}
+        docker push image-registry.apps.silver.devops.gov.bc.ca/c57ee7-test/unity-grantmanager-dbmigrator:${{needs.GenerateTag.outputs.IMAGETAG}}
   PushAlert:
     needs: [GenerateTag, PushTag, Build]
     runs-on: ubuntu-latest
     steps:
-    - name: Push Alert to MS Teams Channel Webhook
+    - name: Push Alert to Microsoft Teams Channel Webhook
       env:
         TAGNAME: ${{needs.GenerateTag.outputs.TAGNAME}}
         TAGMESSAGE: ${{needs.GenerateTag.outputs.TAGMESSAGE}}
