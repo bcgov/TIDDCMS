@@ -1,5 +1,5 @@
 # This is a workflow that is manually UI or API or webhook triggered
-# Repository secrets MSTEAMSWEBHOOK https://bcgov.webhook.office.com/webhookb2/...
+# Repository secrets TEAMSWEBHOOK https://bcgov.webhook.office.com/webhookb2/... 
 # Repository variables VERSION_MAJOR_MINOR 0.1 VERSION_MESSAGE Dev to Test - VERSION_PREFIX v
 
 name: Tag and Alert
@@ -66,8 +66,8 @@ jobs:
       working-directory: ./applications/Unity.GrantManager
     - name: Connect to OpenShift API
       run: |
-        oc login --token=${{secrets.OPENSHIFT_TOKEN_TEST}} --server=${{secrets.OPENSHIFT_CLUSTER}}
-        TARGET_PROJECT=$(oc project | grep -oE '[0-9a-z]*-test') 
+        oc login --token=${{secrets.OPENSHIFT_TOKEN_TEST}} --server=${{vars.OPENSHIFT_CLUSTER}}
+        TARGET_PROJECT=$(oc project | grep -oE '[0-9a-z]*-[dev|test|prod|tools]') 
         oc registry login
     - name: Push application images to OpenShift container registry
       run: | 
@@ -82,4 +82,4 @@ jobs:
         TAGNAME: ${{needs.GenerateTag.outputs.TAGNAME}}
         TAGMESSAGE: ${{needs.GenerateTag.outputs.TAGMESSAGE}}
       run: |
-        curl -H "Content-Type: application/json" --data-raw "{\"text\":\"${{env.TAGNAME}} ${{env.TAGMESSAGE}}\"}" -X POST -k ${{secrets.MSTEAMSWEBHOOK}}
+        curl -H "Content-Type: application/json" --data-raw "{\"text\":\"${{env.TAGNAME}} ${{env.TAGMESSAGE}}\"}" -X POST -k ${{secrets.TEAMSWEBHOOK}}
