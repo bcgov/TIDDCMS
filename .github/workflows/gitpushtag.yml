@@ -1,5 +1,5 @@
 # This is a workflow that is manually UI or API or webhook triggered
-# Repository secrets TEAMSWEBHOOK https://bcgov.webhook.office.com/webhookb2/... 
+# Repository secrets TEAMSWEBHOOK https://bcgov.webhook.office.com/webhookb2/... OPENSHIFT_TOKEN_{DEV|TEST|PROD|TOOLS}
 # Repository variables VERSION_MAJOR_MINOR 0.1 VERSION_MESSAGE Dev to Test - VERSION_PREFIX v
 
 name: Tag and Alert
@@ -11,10 +11,12 @@ on:
     types: [webhook]
 
 env:
-  CLUSTER: https://api.silver.devops.gov.bc.ca:6443
-  AUTH_TOKEN: ${{secrets.OPENSHIFT_TOKEN_TEST}}
-  TARGET_PROJECT: c57ee7
-  TARGET_ENV: test
+  OPENSHIFT_CLUSTER: https://api.silver.devops.gov.bc.ca:6443
+  OPENSHIFT_AUTH_TOKEN: ${{secrets.OPENSHIFT_TOKEN_TEST}}
+  RELEASE_PREFIX: ${{vars.VERSION_PREFIX}}
+  RELEASE_VERSION: ${{vars.VERSION_MAJOR_MINOR}}
+  RELEASE_MESSAGE: ${{vars.VERSION_MESSAGE}} 
+  TEAMS_WEBHOOK: ${{secrets.TEAMSWEBHOOK}}
 
 jobs:
   # This workflow contains a jobs called "GenerateTag" "PushTag" "PushAlert"
@@ -35,15 +37,15 @@ jobs:
     - name: Generate Next Git Tag
       id: nexttag
       run: |
-        VERSION_PATCH=$(git tag --list "${{vars.VERSION_PREFIX}}${{vars.VERSION_MAJOR_MINOR}}.*" --sort=-version:refname | head -n 1 | grep -oE '[0-9]+$')
+        VERSION_PATCH=$(git tag --list "${{env.RELEASE_PREFIX}}${{env.RELEASE_VERSION}}.*" --sort=-version:refname | head -n 1 | grep -oE '[0-9]+$')
         if [ -z "$VERSION_PATCH" ]; then
           VERSION_PATCH=0
         else
           VERSION_PATCH=$((VERSION_PATCH + 1))
         fi
-        echo "gittag=${{vars.VERSION_PREFIX}}${{vars.VERSION_MAJOR_MINOR}}.${VERSION_PATCH}" >> $GITHUB_OUTPUT
-        echo "imagetag=v${{vars.VERSION_MAJOR_MINOR}}.${VERSION_PATCH}" >> $GITHUB_OUTPUT
-        echo "tagmsg=${{vars.VERSION_MESSAGE}} ${{steps.date.outputs.date}}" >> $GITHUB_OUTPUT
+        echo "gittag=${{env.RELEASE_PREFIX}}${{env.RELEASE_VERSION}}.${VERSION_PATCH}" >> $GITHUB_OUTPUT
+        echo "imagetag=v${{env.RELEASE_VERSION}}.${VERSION_PATCH}" >> $GITHUB_OUTPUT
+        echo "tagmsg=${{env.RELEASE_MESSAGE}} ${{steps.date.outputs.date}}" >> $GITHUB_OUTPUT
   PushTag:
     needs: [GenerateTag]
     runs-on: ubuntu-latest
@@ -75,10 +77,9 @@ jobs:
       working-directory: ./applications/Unity.GrantManager
     - name: Connect to OpenShift API
       id: project
-      # Change the target project license suffix and OpenShift service account token together 
       run: |
-        oc login --token=${{secrets.OPENSHIFT_TOKEN_TEST}} --server=${{vars.OPENSHIFT_CLUSTER}}
-        echo "PROJECT=$(oc project | grep -oE '[0-9a-z]*-test')" >> $GITHUB_OUTPUT
+        oc login --token=${{env.OPENSHIFT_AUTH_TOKEN}} --server=${{env.OPENSHIFT_CLUSTER}}
+        echo "PROJECT=$(oc project | grep -oE '[0-9a-z]*-[dev\|test\|prod\|tools]*')" >> $GITHUB_OUTPUT
         oc registry login
     - name: Push application images to OpenShift container registry
       run: | 
@@ -94,4 +95,4 @@ jobs:
         TAGNAME: ${{needs.GenerateTag.outputs.TAGNAME}}
         TAGMESSAGE: ${{needs.GenerateTag.outputs.TAGMESSAGE}}
       run: |
-        curl -H "Content-Type: application/json" --data-raw "{\"text\":\"${{env.TAGNAME}} ${{env.TAGMESSAGE}}\"}" -X POST -k ${{secrets.TEAMSWEBHOOK}}
+        curl -H "Content-Type: application/json" --data-raw "{\"text\":\"${{env.TAGNAME}} ${{env.TAGMESSAGE}}\"}" -X POST -k ${{env.TEAMS_WEBHOOK}}
