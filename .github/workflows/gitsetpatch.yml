@@ -50,7 +50,7 @@ jobs:
         gh variable set VERSION_PATCH --body ${{env.VERSION_PATCH}}
       env:
         GITHUB_TOKEN: ${{ secrets.GH_API_TOKEN }}
-        VERSION_PATCH: ${{needs.GenerateTag.outputs.TAGNPATCH}}
+        VERSION_PATCH: ${{needs.GenerateTag.outputs.TAGPATCH}}
   PushTag:
     needs: [GenerateTag]
     runs-on: ubuntu-latest
