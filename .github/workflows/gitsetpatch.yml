@@ -7,9 +7,6 @@ name: Tag and Alert
 on:
   # Allows manual triggering
   workflow_dispatch:
-  # Allows external webhook triggering
-  repository_dispatch:
-    types: [webhook]
 
 env:
   OPENSHIFT_CLUSTER: https://api.silver.devops.gov.bc.ca:6443
@@ -17,8 +14,7 @@ env:
   RELEASE_PREFIX: ${{vars.VERSION_PREFIX}}
   RELEASE_VERSION: ${{vars.VERSION_MAJOR_MINOR}}
   RELEASE_MESSAGE: ${{vars.VERSION_MESSAGE}} 
-  TEAMS_WEBHOOK: ${{secrets.TEAMSWEBHOOK}}
-
+  RELEASE_PATCH: ${{vars.VERSION_PATCH}} 
 jobs:
   # This workflow contains a jobs called "GenerateTag" "PushTag" "Build" "PushAlert"
   GenerateTag:
@@ -27,6 +23,7 @@ jobs:
       TAGNAME: ${{steps.nexttag.outputs.gittag}}
       IMAGETAG: ${{steps.nexttag.outputs.imagetag}}
       TAGMESSAGE: ${{steps.nexttag.outputs.tagmsg}}
+      TAGPATCH: ${{steps.nexttag.outputs.tagpatch}}
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
@@ -47,6 +44,7 @@ jobs:
         echo "gittag=${{env.RELEASE_PREFIX}}${{env.RELEASE_VERSION}}.${VERSION_PATCH}" >> $GITHUB_OUTPUT
         echo "imagetag=v${{env.RELEASE_VERSION}}.${VERSION_PATCH}" >> $GITHUB_OUTPUT
         echo "tagmsg=${{env.RELEASE_MESSAGE}} ${{steps.date.outputs.date}}" >> $GITHUB_OUTPUT
+        echo "tagpatch=${VERSION_PATCH}" >> $GITHUB_OUTPUT
   PushTag:
     needs: [GenerateTag]
     runs-on: ubuntu-latest
@@ -66,6 +64,6 @@ jobs:
         git push origin ${{env.TAGNAME}}
     - run: |
         gh variable list
-        gh variable set VERSION_PATCH --body "2"
+        gh variable set VERSION_PATCH --body ${{env.TAGPATCH}}
       env:
         GITHUB_TOKEN: ${{ secrets.GH_API_TOKEN }}
