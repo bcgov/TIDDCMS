@@ -1,8 +1,8 @@
 # This is a workflow that is manually UI or API or webhook triggered
 # Repository variables VERSION_MAJOR_MINOR 0.1 VERSION_MESSAGE Dev to Test - VERSION_PREFIX v
 
-name: Set Patch
-# Controls when the action will run. Workflow runs when triggered using the UI or API.
+name: Increment Patch Level
+# Controls when the action will run triggered using the UI or API.
 on:
   # Allows manual triggering
   workflow_dispatch:
