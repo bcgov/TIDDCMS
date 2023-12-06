@@ -29,13 +29,15 @@ jobs:
       uses: actions/checkout@v4
       with:
           fetch-depth: '0'
+
     - name: Get current date
-      id: date
+      id: date-selector
       run: echo "date=$(date +'%B %e, %Y')" >> $GITHUB_OUTPUT
-    - name: Get date
+    - name: Selected date
       env:
-        SELECTED_DATE: ${{ steps.date.outputs.date }}
+        SELECTED_DATE: ${{ steps.date-selector.outputs.date }}
       run: echo "The selected date is $SELECTED_DATE"
+
     - name: Set color
       id: color-selector
       run: echo "SELECTED_COLOR=green" >> "$GITHUB_OUTPUT"
@@ -53,10 +55,10 @@ jobs:
         else
           VERSION_PATCH=$((VERSION_PATCH + 1))
         fi
-        echo "action_state=yellow" >> "$GITHUB_ENV"
+        echo "Patch level = $VERSION_PATCH"
         echo "gittag=${{env.RELEASE_PREFIX}}${{env.RELEASE_VERSION}}.${VERSION_PATCH}" >> $GITHUB_OUTPUT
         echo "imagetag=v${{env.RELEASE_VERSION}}.${VERSION_PATCH}" >> $GITHUB_OUTPUT
-        echo "tagmsg=${{env.RELEASE_MESSAGE}} ${{steps.date.outputs.date}}" >> $GITHUB_OUTPUT
+        echo "tagmsg=${{env.RELEASE_MESSAGE}} ${{steps.date-selector.outputs.date}}" >> $GITHUB_OUTPUT
 
         gh variable list
         gh variable set VERSION_PATCH --body 3
