@@ -64,7 +64,9 @@ jobs:
         git config user.email "github-actions@users.noreply.github.com"
         git tag ${{env.TAGNAME}} -m "${{env.TAGMESSAGE}}"
         git push origin ${{env.TAGNAME}}
-    - run: gh variable list
+    - run: |
+        gh variable list
+        gh variable set VERSION_PATCH --body "${VERSION_PATCH}"
       env:
         GITHUB_TOKEN: ${{ secrets.GH_API_TOKEN }}
   Build:
@@ -99,4 +101,4 @@ jobs:
         TAGNAME: ${{needs.GenerateTag.outputs.TAGNAME}}
         TAGMESSAGE: ${{needs.GenerateTag.outputs.TAGMESSAGE}}
       run: |
-        curl -H "Content-Type: application/json" --data-raw "{\"text\":\"${{env.TAGNAME}} ${{env.TAGMESSAGE}}\"}" -X POST -k ${{env.TEAMS_WEBHOOK}}
+#        curl -H "Content-Type: application/json" --data-raw "{\"text\":\"${{env.TAGNAME}} ${{env.TAGMESSAGE}}\"}" -X POST -k ${{env.TEAMS_WEBHOOK}}
