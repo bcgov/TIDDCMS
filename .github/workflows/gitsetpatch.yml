@@ -34,7 +34,7 @@ jobs:
       run: echo "date=$(date +'%B %e, %Y')" >> $GITHUB_OUTPUT
     - name: Get date
       env:
-        SELECTED_DATE: ${{ steps.date.outputs.SELECTED_DATE }}
+        SELECTED_DATE: ${{ steps.date.outputs.date }}
       run: echo "The selected date is $SELECTED_DATE"
     - name: Set color
       id: color-selector
