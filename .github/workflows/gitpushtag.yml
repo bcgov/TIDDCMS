@@ -66,7 +66,7 @@ jobs:
         git push origin ${{env.TAGNAME}}
     - run: |
         gh variable list
-        gh variable set VERSION_PATCH --body "${{env.TAGNAME}}"
+        gh variable set VERSION_PATCH --body "2"
       env:
         GITHUB_TOKEN: ${{ secrets.GH_API_TOKEN }}
   Build:
