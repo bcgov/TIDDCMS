@@ -32,6 +32,14 @@ jobs:
     - name: Get current date
       id: date
       run: echo "date=$(date +'%B %e, %Y')" >> $GITHUB_OUTPUT
+    - name: Set color
+      id: color-selector
+      run: echo "SELECTED_COLOR=green" >> "$GITHUB_OUTPUT"
+    - name: Get color
+      env:
+        SELECTED_COLOR: ${{ steps.color-selector.outputs.SELECTED_COLOR }}
+      run: echo "The selected color is $SELECTED_COLOR"
+
     - name: Generate Next Git Tag
       id: nexttag
       run: |
@@ -47,7 +55,8 @@ jobs:
         echo "tagmsg=${{env.RELEASE_MESSAGE}} ${{steps.date.outputs.date}}" >> $GITHUB_OUTPUT
         env
         gh variable list
-        gh variable set VERSION_PATCH --body ${{env.VERSION_PATCH}}
+        gh variable set VERSION_PATCH --body 3
+        
       env:
         GITHUB_TOKEN: ${{ secrets.GH_API_TOKEN }}
   PushTag:
