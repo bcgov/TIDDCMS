@@ -59,14 +59,14 @@ jobs:
         echo "gittag=${{env.RELEASE_PREFIX}}${{env.RELEASE_VERSION}}.${VERSION_PATCH}" >> $GITHUB_OUTPUT
         echo "imagetag=v${{env.RELEASE_VERSION}}.${VERSION_PATCH}" >> $GITHUB_OUTPUT
         echo "tagmsg=${{env.RELEASE_MESSAGE}} ${{steps.date-selector.outputs.date}}" >> $GITHUB_OUTPUT
-
+        echo "imagepatch=${VERSION_PATCH}" >> $GITHUB_OUTPUT
         gh variable list
       env:
         GITHUB_TOKEN: ${{ secrets.GH_API_TOKEN }}        
     - name: Generate patch
       id: setpatch
       run: |      
-        gh variable set VERSION_PATCH --body "${{steps.nexttag.outputs.imagetag}}"
+        gh variable set VERSION_PATCH --body "${{steps.nexttag.outputs.imagepatch}}"
         gh variable list      
       env:
         GITHUB_TOKEN: ${{ secrets.GH_API_TOKEN }}
