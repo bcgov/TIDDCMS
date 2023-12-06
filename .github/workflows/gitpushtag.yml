@@ -65,7 +65,8 @@ jobs:
         git tag ${{env.TAGNAME}} -m "${{env.TAGMESSAGE}}"
         git push origin ${{env.TAGNAME}}
     - run: gh variable list
-
+      env:
+        GITHUB_TOKEN: ${{ secrets.GH_API_TOKEN }}
   Build:
     needs: [GenerateTag, PushTag]
     runs-on: ubuntu-latest
