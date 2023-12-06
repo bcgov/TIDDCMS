@@ -61,7 +61,8 @@ jobs:
         echo "tagmsg=${{env.RELEASE_MESSAGE}} ${{steps.date-selector.outputs.date}}" >> $GITHUB_OUTPUT
 
         gh variable list
-        
+      env:
+        GITHUB_TOKEN: ${{ secrets.GH_API_TOKEN }}        
     - name: Generate patch
       id: setpatch
       run: |      
