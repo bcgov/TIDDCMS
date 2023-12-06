@@ -2,7 +2,7 @@
 # Repository secrets TEAMSWEBHOOK https://bcgov.webhook.office.com/webhookb2/... OPENSHIFT_TOKEN_{DEV|TEST|PROD|TOOLS}
 # Repository variables VERSION_MAJOR_MINOR 0.1 VERSION_MESSAGE Dev to Test - VERSION_PREFIX v
 
-name: Tag and Alert
+name: Set Patch
 # Controls when the action will run. Workflow runs when triggered using the UI or API.
 on:
   # Allows manual triggering
