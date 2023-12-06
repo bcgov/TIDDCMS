@@ -64,6 +64,8 @@ jobs:
         git config user.email "github-actions@users.noreply.github.com"
         git tag ${{env.TAGNAME}} -m "${{env.TAGMESSAGE}}"
         git push origin ${{env.TAGNAME}}
+    - run: gh variable list
+
   Build:
     needs: [GenerateTag, PushTag]
     runs-on: ubuntu-latest
