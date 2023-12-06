@@ -61,10 +61,11 @@ jobs:
         echo "tagmsg=${{env.RELEASE_MESSAGE}} ${{steps.date-selector.outputs.date}}" >> $GITHUB_OUTPUT
 
         gh variable list
-        gh variable set VERSION_PATCH --body 3
-        
+        gh variable set VERSION_PATCH --body "$TEST_VAR"
+        gh variable list      
       env:
         GITHUB_TOKEN: ${{ secrets.GH_API_TOKEN }}
+        TEST_VAR: '2'
   PushTag:
     needs: [GenerateTag]
     runs-on: ubuntu-latest
