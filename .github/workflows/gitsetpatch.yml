@@ -1,14 +1,13 @@
 # This is a workflow that is manually UI or API or webhook triggered
-# Repository secrets TEAMSWEBHOOK https://bcgov.webhook.office.com/webhookb2/... OPENSHIFT_TOKEN_{DEV|TEST|PROD|TOOLS}
 # Repository variables VERSION_MAJOR_MINOR 0.1 VERSION_MESSAGE Dev to Test - VERSION_PREFIX v
 
-name: Set Patch
-# Controls when the action will run. Workflow runs when triggered using the UI or API.
+name: Set Patch Level
+# Controls when the action will run triggered using the UI or API.
 on:
   # Allows manual triggering
   workflow_dispatch:
-
 env:
+  GITHUB_TOKEN: ${{secrets.GH_API_TOKEN }}
   OPENSHIFT_CLUSTER: https://api.silver.devops.gov.bc.ca:6443
   OPENSHIFT_AUTH_TOKEN: ${{secrets.OPENSHIFT_TOKEN_TEST}}
   RELEASE_PREFIX: ${{vars.VERSION_PREFIX}}
@@ -16,20 +15,18 @@ env:
   RELEASE_MESSAGE: ${{vars.VERSION_MESSAGE}} 
   RELEASE_PATCH: ${{vars.VERSION_PATCH}} 
 jobs:
-  # This workflow contains a jobs called "GenerateTag" "PushTag" "Build" "PushAlert"
+  # This workflow contains a jobs called "GenerateTag" "PushTag"
   GenerateTag:
     runs-on: ubuntu-latest
     outputs: 
-      TAGNAME: ${{steps.nexttag.outputs.gittag}}
-      IMAGETAG: ${{steps.nexttag.outputs.imagetag}}
-      TAGMESSAGE: ${{steps.nexttag.outputs.tagmsg}}
-      TAGPATCH: ${{steps.nexttag.outputs.tagpatch}}
+      TAGNAME: ${{steps.tag-selector.outputs.gittag}}
+      TAGMESSAGE: ${{steps.tag-selector.outputs.tagmsg}}
+      TAGPATCH: ${{steps.tag-selector.outputs.tagpatch}}
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
       with:
           fetch-depth: '0'
-
     - name: Get current date
       id: date-selector
       run: echo "date=$(date +'%B %e, %Y')" >> $GITHUB_OUTPUT
@@ -37,7 +34,6 @@ jobs:
       env:
         SELECTED_DATE: ${{ steps.date-selector.outputs.date }}
       run: echo "The selected date is $SELECTED_DATE"
-
     - name: Set color
       id: color-selector
       run: echo "SELECTED_COLOR=green" >> "$GITHUB_OUTPUT"
@@ -45,9 +41,8 @@ jobs:
       env:
         SELECTED_COLOR: ${{ steps.color-selector.outputs.SELECTED_COLOR }}
       run: echo "The selected color is $SELECTED_COLOR"
-
     - name: Generate Next Git Tag
-      id: nexttag
+      id: tag-selector
       run: |
         VERSION_PATCH=$(git tag --list "${{env.RELEASE_PREFIX}}${{env.RELEASE_VERSION}}.*" --sort=-version:refname | head -n 1 | grep -oE '[0-9]+$')
         if [ -z "$VERSION_PATCH" ]; then
@@ -55,22 +50,9 @@ jobs:
         else
           VERSION_PATCH=$((VERSION_PATCH + 1))
         fi
-        echo "Patch level = $VERSION_PATCH"
         echo "gittag=${{env.RELEASE_PREFIX}}${{env.RELEASE_VERSION}}.${VERSION_PATCH}" >> $GITHUB_OUTPUT
-        echo "imagetag=v${{env.RELEASE_VERSION}}.${VERSION_PATCH}" >> $GITHUB_OUTPUT
         echo "tagmsg=${{env.RELEASE_MESSAGE}} ${{steps.date-selector.outputs.date}}" >> $GITHUB_OUTPUT
         echo "imagepatch=${VERSION_PATCH}" >> $GITHUB_OUTPUT
-        gh variable list
-      env:
-        GITHUB_TOKEN: ${{ secrets.GH_API_TOKEN }}        
-    - name: Generate patch
-      id: setpatch
-      run: |      
-        gh variable set VERSION_PATCH --body "${{steps.nexttag.outputs.imagepatch}}"
-        gh variable list      
-      env:
-        GITHUB_TOKEN: ${{ secrets.GH_API_TOKEN }}
-
   PushTag:
     needs: [GenerateTag]
     runs-on: ubuntu-latest
@@ -83,9 +65,14 @@ jobs:
       env:
         TAGNAME: ${{needs.GenerateTag.outputs.TAGNAME}}
         TAGMESSAGE: ${{needs.GenerateTag.outputs.TAGMESSAGE}}
+        TAGPATCH: ${{needs.GenerateTag.outputs.TAGPATCH}}
       run: |
         git config user.name "GitHub Actions"
         git config user.email "github-actions@users.noreply.github.com"
         git tag ${{env.TAGNAME}} -m "${{env.TAGMESSAGE}}"
         git push origin ${{env.TAGNAME}}
-
+    - name: Set patch value
+      id: setpatch
+      run: |      
+        gh variable set VERSION_PATCH --body "${{env.TAGPATCH}}"
+        gh variable list     
