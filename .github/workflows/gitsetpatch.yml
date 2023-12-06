@@ -47,9 +47,10 @@ jobs:
         echo "tagpatch=${VERSION_PATCH}" >> $GITHUB_OUTPUT
     - run: |
         gh variable list
-        gh variable set VERSION_PATCH --body ${VERSION_PATCH}
+        gh variable set VERSION_PATCH --body ${{env.VERSION_PATCH}}
       env:
         GITHUB_TOKEN: ${{ secrets.GH_API_TOKEN }}
+        VERSION_PATCH: ${{needs.GenerateTag.outputs.TAGNPATCH}}
   PushTag:
     needs: [GenerateTag]
     runs-on: ubuntu-latest
