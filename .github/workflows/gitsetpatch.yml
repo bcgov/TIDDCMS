@@ -34,13 +34,6 @@ jobs:
       env:
         SELECTED_DATE: ${{ steps.date-selector.outputs.date }}
       run: echo "The selected date is $SELECTED_DATE"
-    - name: Set color
-      id: color-selector
-      run: echo "SELECTED_COLOR=green" >> "$GITHUB_OUTPUT"
-    - name: Get color
-      env:
-        SELECTED_COLOR: ${{ steps.color-selector.outputs.SELECTED_COLOR }}
-      run: echo "The selected color is $SELECTED_COLOR"
     - name: Generate Next Git Tag
       id: tag-selector
       run: |
@@ -52,7 +45,7 @@ jobs:
         fi
         echo "gittag=${{env.RELEASE_PREFIX}}${{env.RELEASE_VERSION}}.${VERSION_PATCH}" >> $GITHUB_OUTPUT
         echo "tagmsg=${{env.RELEASE_MESSAGE}} ${{steps.date-selector.outputs.date}}" >> $GITHUB_OUTPUT
-        echo "imagepatch=${VERSION_PATCH}" >> $GITHUB_OUTPUT
+        echo "tagpatch=${VERSION_PATCH}" >> $GITHUB_OUTPUT
   PushTag:
     needs: [GenerateTag]
     runs-on: ubuntu-latest
