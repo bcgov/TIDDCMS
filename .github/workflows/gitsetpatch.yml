@@ -55,10 +55,10 @@ jobs:
       with:
           fetch-depth: '0'   
     - name: Push Git Tag
+      id: settag
       env:
         TAGNAME: ${{needs.GenerateTag.outputs.TAGNAME}}
         TAGMESSAGE: ${{needs.GenerateTag.outputs.TAGMESSAGE}}
-        TAGPATCH: ${{needs.GenerateTag.outputs.TAGPATCH}}
       run: |
         git config user.name "GitHub Actions"
         git config user.email "github-actions@users.noreply.github.com"
@@ -66,6 +66,8 @@ jobs:
         git push origin ${{env.TAGNAME}}
     - name: Set patch value
       id: setpatch
+      env:
+        TAGPATCH: ${{needs.GenerateTag.outputs.TAGPATCH}}
       run: |      
         gh variable set VERSION_PATCH --body "${{env.TAGPATCH}}"
         gh variable list     
