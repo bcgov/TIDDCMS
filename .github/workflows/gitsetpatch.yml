@@ -44,7 +44,7 @@ jobs:
         echo "gittag=${{env.RELEASE_PREFIX}}${{env.RELEASE_VERSION}}.${VERSION_PATCH}" >> $GITHUB_OUTPUT
         echo "imagetag=v${{env.RELEASE_VERSION}}.${VERSION_PATCH}" >> $GITHUB_OUTPUT
         echo "tagmsg=${{env.RELEASE_MESSAGE}} ${{steps.date.outputs.date}}" >> $GITHUB_OUTPUT
-        echo "PATCH=${VERSION_PATCH}" >> $GITHUB_ENV
+        echo "PATCH=${VERSION_PATCH}" >> "$GITHUB_ENV"
         env
         gh variable list
         gh variable set VERSION_PATCH --body ${{env.VERSION_PATCH}}
