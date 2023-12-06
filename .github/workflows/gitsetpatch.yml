@@ -53,7 +53,7 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
       with:
-          fetch-depth: '0'   
+          fetch-depth: '1'   
     - name: Push Git Tag
       id: settag
       env:
@@ -64,7 +64,7 @@ jobs:
         git config user.email "github-actions@users.noreply.github.com"
         git tag ${{env.TAGNAME}} -m "${{env.TAGMESSAGE}}"
         git push origin ${{env.TAGNAME}}
-    - name: Set patch value
+    - name: Set repository patch value
       id: setpatch
       env:
         TAGPATCH: ${{needs.GenerateTag.outputs.TAGPATCH}}
