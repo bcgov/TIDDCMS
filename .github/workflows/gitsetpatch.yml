@@ -65,7 +65,7 @@ jobs:
         gh variable list      
       env:
         GITHUB_TOKEN: ${{ secrets.GH_API_TOKEN }}
-        TEST_VAR: $VERSION_PATCH
+        TEST_VAR: ${VERSION_PATCH}
   PushTag:
     needs: [GenerateTag]
     runs-on: ubuntu-latest
