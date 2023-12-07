@@ -1,10 +1,10 @@
-# This is a workflow that is either manually or PR merge to "dev" triggered on repository push events
+# This is a workflow that is either manually or PR merge to "dev" triggered 
 name: Dev - Build
 on:
   push:
     branches: [ "dev" ]
     paths-ignore:
-#      - '.github/**'
+      - '.github/**'
       - '.gitignore'
       - 'database/**'
       - 'documentation/**'
@@ -14,18 +14,15 @@ on:
       - 'LICENSE'
       - 'README.md'
       - 'SECURITY.md'
-  # Allow manual triggering
+  # Allow manual workflow triggering
   workflow_dispatch:
-
-# Repository secrets OPENSHIFT_TOKEN_{DEV|TEST|PROD|TOOLS}
-# Repository variables VERSION_MAJOR 0 VERSION_MINOR 1 VERSION_PATCH 1
-# Repository commit short sha revision
+# Workflow dependencies are repository service connector and product version + commit buildId
 env:
   OPENSHIFT_CLUSTER: https://api.silver.devops.gov.bc.ca:6443
   OPENSHIFT_AUTH_TOKEN: ${{secrets.OPENSHIFT_TOKEN_DEV}}
   RELEASE_VERSION: ${{vars.VERSION_MAJOR}}.${{vars.VERSION_MINOR}}.${{vars.VERSION_PATCH}}
 jobs:
-  # This workflow contains a job called  "Build" 
+  # This workflow contains a job called "Build" with steps to set buildArgs, build and push images to container registry
   Build:
     runs-on: ubuntu-latest
     outputs: 
@@ -35,9 +32,9 @@ jobs:
     - name: Get BuildId
       id: commit
       run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
-    - name: Get buildArgs
+    - name: Set buildArgs
       run:  |
-        echo "buildArgs UNITY_BUILD_VERSION: ${{env.RELEASE_VERSION}}, UNITY_BUILD_REVISION: ${{ steps.commit.outputs.sha_short }}"
+        echo "buildArgs UNITY_BUILD_VERSION: ${{env.RELEASE_VERSION}}, UNITY_BUILD_REVISION: ${{steps.commit.outputs.sha_short}}"
     - name: Build Docker mages
       run: |
         rm -f ./docker-compose.override.yml
@@ -54,3 +51,5 @@ jobs:
         echo project = ${{steps.project.outputs.PROJECT}}
         docker tag unity-grantmanager-web image-registry.apps.silver.devops.gov.bc.ca/${{steps.project.outputs.PROJECT}}/unity-grantmanager-web:github-latest
         docker tag unity-grantmanager-dbmigrator image-registry.apps.silver.devops.gov.bc.ca/${{steps.project.outputs.PROJECT}}/unity-grantmanager-dbmigrator:github-latest
+#        docker push image-registry.apps.silver.devops.gov.bc.ca/${{steps.project.outputs.PROJECT}}/unity-grantmanager-web:github-latest
+#        docker push image-registry.apps.silver.devops.gov.bc.ca/${{steps.project.outputs.PROJECT}}/unity-grantmanager-dbmigrator:github-latest
