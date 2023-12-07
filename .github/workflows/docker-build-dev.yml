@@ -41,6 +41,7 @@ jobs:
     - name: Build Docker mages
       run: |
         rm -f ./docker-compose.override.yml
+        echo "buildArgs UNITY_BUILD_VERSION: ${{env.RELEASE_VERSION}}, UNITY_BUILD_REVISION: ${{ steps.commit.outputs.sha_short }}"
         docker compose build
       working-directory: ./applications/Unity.GrantManager
     - name: Connect to OpenShift API
