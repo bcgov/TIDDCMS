@@ -32,12 +32,13 @@ jobs:
       PROJECT: ${{steps.project.outputs.TARGET_PROJECT}}
     steps:
     - uses: actions/checkout@v3
-    - name: Commit sha_short
+    - name: Get commit sha_short
       id: commit
       run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
-    - name: Check outputs
-      run: echo ${{ steps.commit.outputs.sha_short }}
-    - name: Build application Docker images
+    - name: Get buildArgs
+      run:  |
+        echo "buildArgs UNITY_BUILD_VERSION: ${{env.RELEASE_VERSION}}, UNITY_BUILD_REVISION: ${{ steps.commit.outputs.sha_short }}"
+    - name: Build Docker mages
       run: |
         rm -f ./docker-compose.override.yml
         echo "buildArgs UNITY_BUILD_VERSION: ${{env.RELEASE_VERSION}}, UNITY_BUILD_REVISION: ${{ steps.commit.outputs.sha_short }}"
