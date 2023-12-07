@@ -35,7 +35,7 @@ jobs:
     - name: Set buildArgs
       run:  |
         echo "buildArgs UNITY_BUILD_VERSION: ${{env.RELEASE_VERSION}}, UNITY_BUILD_REVISION: ${{steps.commit.outputs.sha_short}}"
-    - name: Build Docker mages
+    - name: Build Docker images
       run: |
         rm -f ./docker-compose.override.yml
         docker compose build --build-arg UNITY_BUILD_VERSION=${{env.RELEASE_VERSION}} --build-arg UNITY_BUILD_REVISION=${{steps.commit.outputs.sha_short}}
@@ -46,7 +46,7 @@ jobs:
         oc login --token=${{env.OPENSHIFT_AUTH_TOKEN}} --server=${{env.OPENSHIFT_CLUSTER}}
         echo "PROJECT=$(oc project | grep -oE '[0-9a-z]*-[dev\|test\|prod\|tools]*')" >> $GITHUB_OUTPUT
         oc registry login
-    - name: Push build images to OpenShift container registry
+    - name: Push build images to container registry
       run: | 
         echo project = ${{steps.project.outputs.PROJECT}}
         docker tag unity-grantmanager-web image-registry.apps.silver.devops.gov.bc.ca/${{steps.project.outputs.PROJECT}}/unity-grantmanager-web:github-latest
